@@ -1,0 +1,321 @@
+import { Extension } from '@tiptap/core';
+import { Plugin, PluginKey } from '@tiptap/pm/state';
+import {
+  getArabicChar,
+  getHarakat,
+  RegularComboStateMachine,
+} from '@/editor/keyboardMaps';
+import { useKeyboardStore } from '@/stores/keyboardStore';
+import { useSettingsStore } from '@/stores/settingsStore';
+import { useUIStore } from '@/stores/uiStore';
+import { useEditorStore } from '@/stores/editorStore';
+
+export const ArabicKeyboard = Extension.create({
+  name: 'arabicKeyboard',
+
+  addKeyboardShortcuts() {
+    return {
+      'Mod-k': () => {
+        useUIStore.getState().toggleSpecialCharacters();
+        return true;
+      },
+      'Mod-f': () => {
+        useEditorStore.getState().toggleAutoReplace();
+        return true;
+      },
+    };
+  },
+
+  addProseMirrorPlugins() {
+    const comboMachine = new RegularComboStateMachine();
+    let isFastWordPending = false;
+
+    return [
+      new Plugin({
+        key: new PluginKey('arabicKeyboard'),
+        props: {
+          handleKeyDown(view, event) {
+            const commitText = (text: string) => {
+              if (view.isDestroyed || !text) return;
+              const { tr } = view.state;
+              view.dispatch(tr.insertText(text));
+            };
+
+            const HARAKAT_REGEX = /[\u064B-\u065F\u0670\u06D6-\u06ED]/;
+
+            const commitHarakat = (text: string) => {
+              if (view.isDestroyed || !text) return;
+              const { state } = view;
+              const { from } = state.selection;
+              let tr = state.tr;
+
+              // Check and remove existing harakat immediately before cursor position
+              let deleteFrom = from;
+              while (deleteFrom > 0) {
+                const charBefore = state.doc.textBetween(deleteFrom - 1, deleteFrom, '');
+                if (charBefore && HARAKAT_REGEX.test(charBefore)) {
+                  deleteFrom--;
+                } else {
+                  break;
+                }
+              }
+
+              if (deleteFrom < from) {
+                tr = tr.delete(deleteFrom, from);
+              }
+
+              view.dispatch(tr.insertText(text));
+            };
+
+            const flushCombo = () => {
+              if (comboMachine.isPending) {
+                comboMachine.flush(commitText);
+              }
+            };
+
+            const { fontScript } = useEditorStore.getState();
+
+            // When in Latin font mode, let standard keyboard input pass through natively (A-Z Latin typing)
+            if (fontScript === 'latin') {
+              flushCombo();
+              return false;
+            }
+
+            const upperKey = event.key.toUpperCase();
+
+            // 1. Handle FastWord pending input (Alt+W then Letter)
+            if (isFastWordPending && !event.ctrlKey && !event.metaKey && !event.altKey) {
+              if (/^[a-zA-Z]$/.test(event.key)) {
+                event.preventDefault();
+                isFastWordPending = false;
+                const entry = useSettingsStore.getState().getFastWord(event.key);
+                if (entry) {
+                  commitText(entry.text);
+                }
+                return true;
+              }
+              isFastWordPending = false;
+            }
+
+            // 2. Alt + W: Trigger FastWord waiting mode
+            if (event.altKey && (event.key === 'w' || event.key === 'W')) {
+              event.preventDefault();
+              flushCombo();
+              isFastWordPending = true;
+              return true;
+            }
+
+            // 3. Alt + 1..5: Open Special Characters group tab
+            if (event.altKey && /^[1-5]$/.test(event.key)) {
+              event.preventDefault();
+              flushCombo();
+              const grpNum = parseInt(event.key, 10);
+              useUIStore.getState().setSpecialCharactersOpen(true);
+              useUIStore.getState().setSpecialCharactersGroup(grpNum);
+              return true;
+            }
+
+            // 4. Function Keys (F1 - F12)
+            if (/^F([1-9]|1[0-2])$/.test(upperKey)) {
+              const settings = useSettingsStore.getState();
+              if (settings.enableFKeyShortcuts) {
+                // F12: Waqaf & Nomor Ayat di akhir ayat (Manual halaman 17)
+                if (upperKey === 'F12' && !event.shiftKey) {
+                  event.preventDefault();
+                  flushCombo();
+                  useUIStore.getState().openWaqafDialog('end');
+                  return true;
+                }
+
+                // Shift + F12: Tanda Waqaf di tengah ayat (Manual halaman 17)
+                if (upperKey === 'F12' && event.shiftKey) {
+                  event.preventDefault();
+                  flushCombo();
+                  useUIStore.getState().openWaqafDialog('mid');
+                  return true;
+                }
+
+                // Shift + F1: Fathah tegak / Alif khanjariyah (ـٰ)
+                if (upperKey === 'F1' && event.shiftKey) {
+                  event.preventDefault();
+                  flushCombo();
+                  commitHarakat('\u0670');
+                  return true;
+                }
+
+                // Shift + F2: Kasrah tegak (ـٖ)
+                if (upperKey === 'F2' && event.shiftKey) {
+                  event.preventDefault();
+                  flushCombo();
+                  commitHarakat('\u0656');
+                  return true;
+                }
+
+                // Shift + F3: Dhammah terbalik (ـٗ)
+                if (upperKey === 'F3' && event.shiftKey) {
+                  event.preventDefault();
+                  flushCombo();
+                  commitHarakat('\u0657');
+                  return true;
+                }
+
+                // Shift + F7: Sukun (ـْ)
+                if (upperKey === 'F7' && event.shiftKey) {
+                  event.preventDefault();
+                  flushCombo();
+                  commitHarakat('\u0652');
+                  return true;
+                }
+
+                // Regular Harakat F1 - F11
+                const harakat = getHarakat(upperKey);
+                if (harakat) {
+                  event.preventDefault();
+                  flushCombo();
+                  const text = Array.isArray(harakat) ? harakat.join('') : harakat;
+                  commitHarakat(text);
+                  return true;
+                }
+              }
+            }
+
+            // 5. Special Quranic Diacritics shortcuts:
+            // Ctrl + '-' -> Mad Wajib (ـۤ)
+            if ((event.ctrlKey || event.metaKey) && event.key === '-') {
+              event.preventDefault();
+              flushCombo();
+              commitHarakat('\u0654'); // Mad Wajib / Hamzah atas
+              return true;
+            }
+
+            // Ctrl + '=' -> Mad Jaiz (ـٓ)
+            if ((event.ctrlKey || event.metaKey) && (event.key === '=' || event.key === '+')) {
+              event.preventDefault();
+              flushCombo();
+              commitHarakat('\u0653'); // Maddah / Mad Jaiz
+              return true;
+            }
+
+            // Ctrl + '\' -> Mim Iqlab (مۢ)
+            if ((event.ctrlKey || event.metaKey) && event.key === '\\') {
+              event.preventDefault();
+              flushCombo();
+              commitHarakat('\u06E2'); // Meem Iqlab
+              return true;
+            }
+
+            // 6. Direct '@' key for Lafadz Allah
+            if (event.key === '@' && !event.ctrlKey && !event.metaKey && !event.altKey) {
+              event.preventDefault();
+              flushCombo();
+              commitText('اللَّهِ');
+              return true;
+            }
+
+            // 7. Space & Tatweel (Kashida) Variants (Manual Halaman 19, 26)
+            if (event.code === 'Space' || event.key === ' ') {
+              if (event.shiftKey) {
+                // Shift + Space: Spasi kecil / ZWNJ
+                event.preventDefault();
+                flushCombo();
+                commitText('\u200C');
+                return true;
+              }
+              if (event.ctrlKey) {
+                // Ctrl + Space: Menutup huruf tanpa spasi lebar
+                event.preventDefault();
+                flushCombo();
+                commitText('\u00A0');
+                return true;
+              }
+              // Normal Space
+              flushCombo();
+              return false;
+            }
+
+            // Minus '-' / Tatweel untuk perataan manual
+            if (event.key === '-' && !event.ctrlKey && !event.metaKey && !event.altKey) {
+              if (event.shiftKey) {
+                // Shift + '-' -> Garis hubung panjang (Multi-Tatweel untuk manual justify)
+                event.preventDefault();
+                flushCombo();
+                commitText('ــــ');
+                return true;
+              }
+              // '-' -> Garis hubung normal (Tatweel)
+              event.preventDefault();
+              flushCombo();
+              commitText('ـ');
+              return true;
+            }
+
+            // 8. Normal Control / Navigation keys
+            if (event.ctrlKey || event.metaKey || event.altKey) {
+              flushCombo();
+              return false;
+            }
+
+            if (event.key.length !== 1) {
+              flushCombo();
+              return false;
+            }
+
+            // 9. Arabic Character mapping based on Keyboard Mode
+            const { keyboardMode, isVirtualKeyboardCaps } = useKeyboardStore.getState();
+            const shiftActive = event.shiftKey || isVirtualKeyboardCaps;
+
+            if (keyboardMode === 'regular') {
+              if (shiftActive) {
+                flushCombo();
+                const mappedChar = getArabicChar(event.key, 'regular', true);
+                if (mappedChar) {
+                  event.preventDefault();
+                  commitText(mappedChar);
+                  return true;
+                }
+              }
+
+              // Use combo machine for phonetic typing (sh -> ص, sy -> ش, etc.)
+              event.preventDefault();
+              const handled = comboMachine.handleKey(event.key, commitText);
+              if (!handled) {
+                const fallback = getArabicChar(event.key, 'regular', false) ?? event.key;
+                commitText(fallback);
+              }
+              return true;
+            }
+
+            if (keyboardMode === 'standard' || keyboardMode === 'arabic') {
+              flushCombo();
+              const arabicChar = getArabicChar(event.key, keyboardMode, shiftActive);
+              if (arabicChar !== null) {
+                event.preventDefault();
+                commitText(arabicChar);
+                return true;
+              }
+              return false;
+            }
+
+            return false;
+          },
+
+          handleDOMEvents: {
+            blur() {
+              if (comboMachine.isPending) {
+                comboMachine.reset();
+              }
+              isFastWordPending = false;
+              return false;
+            },
+          },
+        },
+
+        destroy() {
+          comboMachine.reset();
+        },
+      }),
+    ];
+  },
+});
+
+export default ArabicKeyboard;
