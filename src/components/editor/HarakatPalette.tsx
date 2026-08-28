@@ -12,7 +12,7 @@ export function HarakatPalette() {
   const harakatPaletteOpen = useUIStore((s) => s.harakatPaletteOpen);
   const setHarakatPaletteOpen = useUIStore((s) => s.setHarakatPaletteOpen);
 
-  const [activeCategory, setActiveCategory] = useState<'all' | 'single' | 'tasydid' | 'maddah'>('all');
+  const [activeCategory, setActiveCategory] = useState<'all' | 'single' | 'tasydid' | 'maddah' | 'special'>('all');
   const [pressedId, setPressedId] = useState<string | null>(null);
 
   if (!harakatPaletteOpen) return null;
@@ -23,7 +23,13 @@ export function HarakatPalette() {
 
     if (!editor) return;
 
-    // Remove existing harakat before cursor and insert new one
+    // Remove existing harakat before cursor and insert new one (except for standalone marks)
+    const isStandalone = item.id.startsWith('sp_');
+    if (isStandalone) {
+      editor.chain().focus().insertContent(item.char).run();
+      return;
+    }
+
     const { state } = editor;
     const { from } = state.selection;
     let deleteFrom = from;
@@ -74,7 +80,7 @@ export function HarakatPalette() {
             {t('harakat.panelTitle', 'Panel Tanda Harakat & Tashkeel')}
           </span>
           <span className="hidden md:inline text-[11px] text-gray-600 dark:text-gray-400 font-mono bg-black/5 dark:bg-white/5 px-2 py-0.5 rounded">
-            F1 - F10 • Shift+F1..F10 • Ctrl+F1..F10
+            F1 - F10 • Shift+F1..F10 • Ctrl+F1..F10 • Ctrl+ -/=/\\
           </span>
         </div>
 
@@ -104,7 +110,9 @@ export function HarakatPalette() {
                 ? 'Tunggal (F1-F10)'
                 : cat.id === 'tasydid'
                 ? 'Tasydid (Shift+F)'
-                : 'Maddah (Ctrl+F)'}
+                : cat.id === 'maddah'
+                ? 'Maddah (Ctrl+F)'
+                : 'Mad & Iqlab Khusus'}
             </button>
           ))}
         </div>
