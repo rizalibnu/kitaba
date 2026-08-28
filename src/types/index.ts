@@ -68,18 +68,56 @@ export interface FontOption {
   script: FontScript;
 }
 
-// Model Font Arab
+// Model Font Arab Unik (Standar Mushaf, Naskh Klasik, Farisy, Ruq'ah, Modern)
 export const ARABIC_FONTS: FontOption[] = [
-  { family: 'Naskh (harakat)', label: 'Naskh (harakat)', cssFamily: '"Amiri", "Noto Naskh Arabic", serif', script: 'arabic' },
-  { family: 'Farisy', label: 'Farisy (Nastaliq)', cssFamily: '"Lateef", "Amiri", serif', script: 'arabic' },
-  { family: 'Shafa', label: 'Shafa (Naskhi Modern)', cssFamily: '"Scheherazade New", serif', script: 'arabic' },
-  { family: 'Najed', label: 'Najed', cssFamily: '"Cairo", "Amiri", sans-serif', script: 'arabic' },
-  { family: 'Diwani', label: 'Diwani', cssFamily: '"Aref Ruqaa", "Amiri", serif', script: 'arabic' },
-  { family: 'Reqa', label: 'Reqa', cssFamily: '"Aref Ruqaa", "Amiri", serif', script: 'arabic' },
-  { family: 'Tsuluts', label: 'Tsuluts (Thuluth)', cssFamily: '"Amiri Quran", "Amiri", serif', script: 'arabic' },
-  { family: 'Amiri', label: 'Amiri', cssFamily: '"Amiri", serif', script: 'arabic' },
-  { family: 'Noto Naskh Arabic', label: 'Noto Naskh Arabic', cssFamily: '"Noto Naskh Arabic", serif', script: 'arabic' },
-  { family: 'Scheherazade New', label: 'Scheherazade New', cssFamily: '"Scheherazade New", serif', script: 'arabic' },
+  {
+    family: 'LPMQ Isep Misbah',
+    label: 'LPMQ Isep Misbah (Kemenag RI)',
+    cssFamily: '"LPMQ Isep Misbah", "Amiri", serif',
+    script: 'arabic',
+  },
+  {
+    family: 'Amiri',
+    label: 'Amiri (Naskh Klasik)',
+    cssFamily: '"Amiri", serif',
+    script: 'arabic',
+  },
+  {
+    family: 'Scheherazade New',
+    label: 'Scheherazade New (Naskh Timur)',
+    cssFamily: '"Scheherazade New", serif',
+    script: 'arabic',
+  },
+  {
+    family: 'Noto Naskh Arabic',
+    label: 'Noto Naskh (Modern Clean)',
+    cssFamily: '"Noto Naskh Arabic", serif',
+    script: 'arabic',
+  },
+  {
+    family: 'Noto Nastaliq Urdu',
+    label: 'Farisy (Nastaliq Persia/Urdu)',
+    cssFamily: '"Noto Nastaliq Urdu", serif',
+    script: 'arabic',
+  },
+  {
+    family: 'Aref Ruqaa',
+    label: "Ruq'ah (Aref Ruqaa)",
+    cssFamily: '"Aref Ruqaa", serif',
+    script: 'arabic',
+  },
+  {
+    family: 'Amiri Quran',
+    label: 'Amiri Quran (Mushaf Standar)',
+    cssFamily: '"Amiri Quran", "Amiri", serif',
+    script: 'arabic',
+  },
+  {
+    family: 'Cairo',
+    label: 'Cairo (Modern Sans)',
+    cssFamily: '"Cairo", sans-serif',
+    script: 'arabic',
+  },
 ];
 
 // Model Font Latin (Standard & Google Fonts)
@@ -100,20 +138,17 @@ export const AVAILABLE_FONTS: FontOption[] = [...ARABIC_FONTS, ...LATIN_FONTS];
 
 export const FONT_SIZES = [12, 14, 16, 18, 20, 22, 24, 26, 28, 32, 36, 48, 72];
 
-// 12 Tanda Waqaf Kitaba (Authentic Nonosoft matrix: 4 rows x 3 cols)
-export const KITABA_WAQAF_SIGNS: WaqafSign[] = [
-  { id: 'mim', char: 'مـ', nameId: 'Waqaf Lazim (م)', nameEn: 'Compulsory Stop (م)', nameAr: 'وقف لازم', unicode: 'U+06D6' },
-  { id: 'saly', char: 'صلى', nameId: 'Al-Wasl Awla (صلى)', nameEn: 'Preferred Continue (صلى)', nameAr: 'الوصل أولى', unicode: 'U+06DA' },
-  { id: 'sad', char: 'صـ', nameId: 'Waqaf Murakhkhas (ص)', nameEn: 'Permitted Stop (ص)', nameAr: 'وقف مرخص', unicode: 'U+06D9' },
-  { id: 'la', char: 'لا', nameId: 'La Taqif (لا)', nameEn: 'Do Not Stop (لا)', nameAr: 'لا تقف', unicode: 'U+06DC' },
-  { id: 'three_dots', char: '؞', nameId: "Mu'anaqah (؞)", nameEn: 'Embracing Stop (؞)', nameAr: 'معانقة', unicode: 'U+061E' },
-  { id: 'qaf', char: 'ق', nameId: 'Qila Alayhil Waqf (ق)', nameEn: 'Weak Stop (ق)', nameAr: 'قيل عليه الوقف', unicode: 'U+06D7' },
-  { id: 'jim', char: 'جـ', nameId: 'Waqaf Jaiz (ج)', nameEn: 'Permissible Stop (ج)', nameAr: 'وقف جائز', unicode: 'U+06D8' },
-  { id: 'tho', char: 'طـ', nameId: 'Waqaf Mutlaq (ط)', nameEn: 'Absolute Stop (ط)', nameAr: 'وقف مطلق', unicode: 'U+06D7' },
-  { id: 'ain', char: 'ع', nameId: 'Tanda Ruku (ع)', nameEn: 'Ruku End (ع)', nameAr: 'علامة الركوع', unicode: 'U+06E3' },
-  { id: 'qaly', char: 'قلى', nameId: 'Al-Waqf Awla (قلى)', nameEn: 'Preferred Stop (قلى)', nameAr: 'الوقف أولى', unicode: 'U+06DB' },
-  { id: 'zay', char: 'ز', nameId: 'Waqaf Mujawwaz (ز)', nameEn: 'Allowed Stop (ز)', nameAr: 'وقف مجوز', unicode: 'U+06D8' },
-  { id: 'saktah', char: 'سكته', nameId: 'Saktah (سكته)', nameEn: 'Short Silence (سكته)', nameAr: 'سكتة لطيفة', unicode: 'U+06DF' },
+// Tanda Waqaf Standar Al-Qur'an (Unicode Combining Small High Signs U+06D6 - U+06E3)
+export const KITABA_WAQAF_SIGNS: (WaqafSign & { displayLabel?: string })[] = [
+  { id: 'mim', char: '\u06D6', displayLabel: 'مـ', nameId: 'Waqaf Lazim (U+06D6)', nameEn: 'Compulsory Stop (مـ)', nameAr: 'وقف لازم', unicode: 'U+06D6' },
+  { id: 'qaly', char: '\u06D7', displayLabel: 'قلى', nameId: 'Waqaf Qila (U+06D7)', nameEn: 'Preferred Stop (قلى)', nameAr: 'الوقف أولى', unicode: 'U+06D7' },
+  { id: 'saly', char: '\u06D8', displayLabel: 'صلى', nameId: 'Wasal Awla (U+06D8)', nameEn: 'Preferred Continue (صلى)', nameAr: 'الوصل أولى', unicode: 'U+06D8' },
+  { id: 'jim', char: '\u06D9', displayLabel: 'ج', nameId: 'Waqaf Jaiz (U+06D9)', nameEn: 'Permissible Stop (ج)', nameAr: 'وقف جائز', unicode: 'U+06D9' },
+  { id: 'tho', char: '\u06DA', displayLabel: 'ط', nameId: 'Waqaf Mutlaq (U+06DA)', nameEn: 'Absolute Stop (ط)', nameAr: 'وقف مطلق', unicode: 'U+06DA' },
+  { id: 'three_dots', char: '\u06DB', displayLabel: '؞', nameId: "Waqaf Mu'anaqah (U+06DB)", nameEn: 'Embracing Stop (؞)', nameAr: 'معانقة', unicode: 'U+06DB' },
+  { id: 'la', char: '\u06E2', displayLabel: 'لا', nameId: 'La Tazil (U+06E2)', nameEn: 'Do Not Stop (لا)', nameAr: 'لا تقف', unicode: 'U+06E2' },
+  { id: 'saktah', char: '\u06DC', displayLabel: 'سكته', nameId: 'Saktah (U+06DC)', nameEn: 'Short Silence (سكته)', nameAr: 'سكتة لطيفة', unicode: 'U+06DC' },
+  { id: 'ain', char: '\u06E3', displayLabel: 'ع', nameId: 'Tanda Ruku (U+06E3)', nameEn: 'Ruku End (ع)', nameAr: 'علامة الركوع', unicode: 'U+06E3' },
 ];
 
 // 5 Group Karakter Spesial Kitaba

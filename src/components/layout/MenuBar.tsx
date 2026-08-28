@@ -382,13 +382,27 @@ export function MenuBar() {
           id: 'increaseFont',
           label: 'Increase Font Size',
           shortcut: 'Ctrl+H',
-          action: () => setFontSize(fontSize + 2),
+          action: () => {
+            if (!editor) return;
+            const activeTextStyle = editor.getAttributes('textStyle') || {};
+            const activeSize = activeTextStyle.fontSize ? parseInt(String(activeTextStyle.fontSize), 10) : fontSize;
+            const nextSize = (isNaN(activeSize) ? fontSize : activeSize) + 2;
+            editor.chain().focus().setFontSize(`${nextSize}px`).run();
+            setFontSize(nextSize);
+          },
         },
         {
           id: 'decreaseFont',
           label: 'Decrease Font Size',
           shortcut: 'Ctrl+D',
-          action: () => setFontSize(Math.max(8, fontSize - 2)),
+          action: () => {
+            if (!editor) return;
+            const activeTextStyle = editor.getAttributes('textStyle') || {};
+            const activeSize = activeTextStyle.fontSize ? parseInt(String(activeTextStyle.fontSize), 10) : fontSize;
+            const nextSize = Math.max(8, (isNaN(activeSize) ? fontSize : activeSize) - 2);
+            editor.chain().focus().setFontSize(`${nextSize}px`).run();
+            setFontSize(nextSize);
+          },
         },
         { id: 'sep-fmt-2', label: '', separator: true },
         {
@@ -473,18 +487,11 @@ export function MenuBar() {
       label: 'Insert',
       items: [
         {
-          id: 'endWaqaf',
-          label: 'Nomor Ayat & Waqaf Akhir..',
+          id: 'waqafAndAyah',
+          label: 'Tanda Waqaf & Nomor Ayat..',
           icon: Hash,
           shortcut: 'F12',
           action: () => useUIStore.getState().openWaqafDialog('end'),
-        },
-        {
-          id: 'midWaqaf',
-          label: 'Tanda Waqaf di Tengah Ayat..',
-          icon: Sparkles,
-          shortcut: 'Shift+F12',
-          action: () => useUIStore.getState().openWaqafDialog('mid'),
         },
         { id: 'sep-ins-1', label: '', separator: true },
         {

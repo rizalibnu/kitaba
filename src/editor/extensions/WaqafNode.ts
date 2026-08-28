@@ -28,9 +28,15 @@ export const WaqafNode = Node.create<WaqafOptions>({
     return {
       sign: {
         default: '',
-        parseHTML: (element) =>
-          element.getAttribute('data-sign') || element.textContent || '',
+        parseHTML: (element) => {
+          const attrVal = element.getAttribute('data-sign') || element.getAttribute('data-waqaf');
+          if (attrVal && attrVal !== 'true' && attrVal !== 'false') {
+            return attrVal;
+          }
+          return element.textContent?.trim() || '';
+        },
         renderHTML: (attributes) => ({
+          'data-waqaf': attributes.sign,
           'data-sign': attributes.sign,
         }),
       },

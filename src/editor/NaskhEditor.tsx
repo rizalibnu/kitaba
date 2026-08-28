@@ -19,14 +19,13 @@ import { setActiveEditor } from './EditorContext';
 import { useDocumentStore } from '@/stores/documentStore';
 import { useEditorStore } from '@/stores/editorStore';
 import { useUIStore } from '@/stores/uiStore';
-import { AVAILABLE_FONTS } from '@/types';
 import { processImportedContent } from '@/lib/khtImportHelper';
 
 export function NaskhEditor() {
   const { t } = useTranslation();
   const activeDoc = useDocumentStore((s) => s.getActiveDocument());
   const updateContent = useDocumentStore((s) => s.updateDocumentContent);
-  const { fontFamily, fontSize, lineHeight, textDirection, zoom } = useEditorStore();
+  const { fontSize, lineHeight, textDirection, zoom } = useEditorStore();
   const zoomIn = useEditorStore((s) => s.zoomIn);
   const zoomOut = useEditorStore((s) => s.zoomOut);
   const resetZoom = useEditorStore((s) => s.resetZoom);
@@ -53,11 +52,6 @@ export function NaskhEditor() {
     return () => container.removeEventListener('wheel', handleWheel);
   }, [zoomIn, zoomOut]);
 
-  // Resolve CSS font family
-  const resolvedFont =
-    AVAILABLE_FONTS.find((f) => f.family === fontFamily)?.cssFamily ||
-    '"Amiri", "Noto Naskh Arabic", serif';
-
   const editor = useEditor({
     extensions: [
       StarterKit,
@@ -83,7 +77,7 @@ export function NaskhEditor() {
       attributes: {
         class: 'tiptap focus:outline-hidden',
         dir: textDirection,
-        style: `font-family: ${resolvedFont}; font-size: ${fontSize}px; line-height: ${lineHeight};`,
+        style: `line-height: ${lineHeight};`,
       },
     },
     onUpdate: ({ editor }) => {
@@ -133,13 +127,25 @@ export function NaskhEditor() {
           editor?.chain().focus().setTextAlign('justify').run();
         }
 
-        // Font Size Shortcuts
-        else if (keyLower === 'h' || e.key === ']') {
+        // Font Size Shortcuts (Character-level / Selection via Tiptap)
+        else if ((keyLower === 'h' && !e.shiftKey) || e.key === ']') {
           e.preventDefault();
-          useEditorStore.getState().setFontSize(fontSize + 2);
+          if (editor) {
+            const activeTextStyle = editor.getAttributes('textStyle') || {};
+            const activeSize = activeTextStyle.fontSize ? parseInt(String(activeTextStyle.fontSize), 10) : fontSize;
+            const nextSize = (isNaN(activeSize) ? fontSize : activeSize) + 2;
+            editor.chain().focus().setFontSize(`${nextSize}px`).run();
+            useEditorStore.getState().setFontSize(nextSize);
+          }
         } else if (keyLower === 'd' || e.key === '[') {
           e.preventDefault();
-          useEditorStore.getState().setFontSize(Math.max(8, fontSize - 2));
+          if (editor) {
+            const activeTextStyle = editor.getAttributes('textStyle') || {};
+            const activeSize = activeTextStyle.fontSize ? parseInt(String(activeTextStyle.fontSize), 10) : fontSize;
+            const nextSize = Math.max(8, (isNaN(activeSize) ? fontSize : activeSize) - 2);
+            editor.chain().focus().setFontSize(`${nextSize}px`).run();
+            useEditorStore.getState().setFontSize(nextSize);
+          }
         }
 
         // Document Save (Ctrl+S)
@@ -217,16 +223,12 @@ export function NaskhEditor() {
     }
   }, [editor, activeDoc?.id]);
 
-  // Sync editor font, size, line-height, and text direction changes
+  // Sync editor direction and line-height on container
   useEffect(() => {
     if (!editor || editor.isDestroyed) return;
 
-    const styleStr = `font-family: ${resolvedFont}; font-size: ${fontSize}px; line-height: ${lineHeight};`;
-
     if (editor.view?.dom) {
       editor.view.dom.setAttribute('dir', textDirection);
-      editor.view.dom.style.fontFamily = resolvedFont;
-      editor.view.dom.style.fontSize = `${fontSize}px`;
       editor.view.dom.style.lineHeight = `${lineHeight}`;
     }
 
@@ -235,11 +237,11 @@ export function NaskhEditor() {
         attributes: {
           class: 'tiptap focus:outline-hidden',
           dir: textDirection,
-          style: styleStr,
+          style: `line-height: ${lineHeight};`,
         },
       },
     });
-  }, [editor, resolvedFont, fontSize, lineHeight, textDirection]);
+  }, [editor, lineHeight, textDirection]);
 
   if (!activeDoc) {
     return (

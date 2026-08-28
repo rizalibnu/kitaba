@@ -27,14 +27,13 @@ export const AyahNode = Node.create<AyahOptions>({
   addAttributes() {
     return {
       number: {
-        default: 1,
+        default: '1',
         parseHTML: (element) => {
-          const val =
-            element.getAttribute('data-ayah') ||
-            element.getAttribute('data-number') ||
-            element.textContent ||
-            '1';
-          return val;
+          const attrVal = element.getAttribute('data-ayah') || element.getAttribute('data-number');
+          if (attrVal && attrVal !== 'true' && attrVal !== 'false') {
+            return attrVal;
+          }
+          return element.textContent?.trim() || '1';
         },
         renderHTML: (attributes) => ({
           'data-ayah': attributes.number,
@@ -48,23 +47,28 @@ export const AyahNode = Node.create<AyahOptions>({
       {
         tag: 'span[data-ayah]',
       },
+      {
+        tag: 'span.ayah-number',
+      },
     ];
   },
 
   renderHTML({ HTMLAttributes }) {
-    const num =
-      HTMLAttributes['data-ayah'] ??
+    const rawVal =
       HTMLAttributes.number ??
-      HTMLAttributes.ayahNumber ??
+      HTMLAttributes['data-ayah'] ??
       '1';
+    const valStr = String(rawVal === 'true' || rawVal === 'false' ? '1' : rawVal);
+    const displayText = valStr.startsWith('﴿') ? valStr : `﴿${valStr}﴾`;
+
     return [
       'span',
       mergeAttributes(
-        { 'data-ayah': String(num), class: 'ayah-number' },
+        { 'data-ayah': valStr, class: 'ayah-number' },
         this.options.HTMLAttributes,
         HTMLAttributes
       ),
-      String(num),
+      displayText,
     ];
   },
 

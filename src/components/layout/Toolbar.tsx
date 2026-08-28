@@ -1,4 +1,4 @@
-import type { ElementType } from 'react';
+import { useState, useEffect, type ElementType } from 'react';
 import {
   FilePlus,
   FolderOpen,
@@ -30,13 +30,25 @@ import { useUIStore } from '@/stores/uiStore';
 import { useDocumentStore } from '@/stores/documentStore';
 import { useEditorStore } from '@/stores/editorStore';
 import { useNaskhEditor } from '@/editor/EditorContext';
-import { ARABIC_FONTS, LATIN_FONTS, FONT_SIZES } from '@/types';
+import { ARABIC_FONTS, LATIN_FONTS, AVAILABLE_FONTS, FONT_SIZES } from '@/types';
 import { triggerKhtImport } from '@/lib/khtImportHelper';
 
 const ZOOM_PRESETS = [50, 75, 90, 100, 125, 150, 175, 200, 250, 300];
 
 export function Toolbar() {
   const editor = useNaskhEditor();
+  const [, setSelectionTick] = useState(0);
+
+  useEffect(() => {
+    if (!editor) return;
+    const handleUpdate = () => setSelectionTick((t) => t + 1);
+    editor.on('selectionUpdate', handleUpdate);
+    editor.on('transaction', handleUpdate);
+    return () => {
+      editor.off('selectionUpdate', handleUpdate);
+      editor.off('transaction', handleUpdate);
+    };
+  }, [editor]);
 
   const createDocument = useDocumentStore((s) => s.createDocument);
   const activeDoc = useDocumentStore((s) => s.getActiveDocument());
@@ -217,12 +229,33 @@ export function Toolbar() {
         {fontScript === 'arabic' ? 'ع' : 'A'}
       </button>
 
-      {/* Group 7: Font Family Dropdown (Dynamic based on Arabic/Latin script) */}
+      {/* Group 7: Font Family Dropdown (Character-level / Selection via Tiptap) */}
       <select
-        value={fontFamily}
-        onChange={(e) => setFontFamily(e.target.value)}
+        value={
+          (() => {
+            const activeTextStyle = editor?.getAttributes('textStyle') || {};
+            const activeFamily = activeTextStyle.fontFamily;
+            if (activeFamily) {
+              const matched = currentFonts.find(
+                (f) => f.cssFamily === activeFamily || f.family === activeFamily
+              );
+              if (matched) return matched.family;
+            }
+            return fontFamily;
+          })()
+        }
+        onChange={(e) => {
+          const newFamily = e.target.value;
+          setFontFamily(newFamily);
+          if (editor) {
+            const fontObj = AVAILABLE_FONTS.find((f) => f.family === newFamily);
+            const cssFamily = fontObj?.cssFamily || newFamily;
+            editor.chain().focus().setFontFamily(cssFamily).run();
+          }
+        }}
         className="h-8.5 px-3 text-xs font-semibold bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-hidden focus:border-amber-500 cursor-pointer shadow-xs"
         style={{ minWidth: '160px' }}
+        title="Pilih Jenis Huruf (Font Family) untuk teks yang dipilih atau kursor saat ini"
       >
         {currentFonts.map((font) => (
           <option key={font.family} value={font.family}>
@@ -231,12 +264,29 @@ export function Toolbar() {
         ))}
       </select>
 
-      {/* Group 8: Font Size Dropdown */}
+      {/* Group 8: Font Size Dropdown (Character-level / Selection via Tiptap) */}
       <select
-        value={fontSize}
-        onChange={(e) => setFontSize(Number(e.target.value))}
+        value={
+          (() => {
+            const activeTextStyle = editor?.getAttributes('textStyle') || {};
+            const activeSize = activeTextStyle.fontSize;
+            if (activeSize) {
+              const numSize = parseInt(String(activeSize), 10);
+              if (!isNaN(numSize)) return numSize;
+            }
+            return fontSize;
+          })()
+        }
+        onChange={(e) => {
+          const newSize = Number(e.target.value);
+          setFontSize(newSize);
+          if (editor) {
+            editor.chain().focus().setFontSize(`${newSize}px`).run();
+          }
+        }}
         className="h-8.5 px-2 text-xs font-bold bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-hidden focus:border-amber-500 cursor-pointer shadow-xs text-center"
         style={{ width: '62px' }}
+        title="Pilih Ukuran Huruf (Font Size) untuk teks yang dipilih atau kursor saat ini"
       >
         {FONT_SIZES.map((sz) => (
           <option key={sz} value={sz}>

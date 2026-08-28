@@ -31,8 +31,16 @@
   --color-editor-light: #FFFEF7;
   --color-editor-dark: #2B2B3B;
 
-  --font-arabic: "Amiri", "Noto Naskh Arabic", "Scheherazade New", serif;
+  --font-arabic: "LPMQ Isep Misbah", "Amiri", "Noto Naskh Arabic", "Scheherazade New", serif;
   --font-ui: "Inter", "Segoe UI", system-ui, sans-serif;
+}
+
+@font-face {
+  font-family: 'LPMQ Isep Misbah';
+  src: url('/fonts/lpmq.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
 }
 
 /* Base styles */
@@ -90,25 +98,23 @@ html {
 /* Waqaf signs */
 .tiptap .waqaf-sign {
   display: inline-block;
-  color: var(--color-gold-600);
-  font-size: 0.9em;
+  color: inherit;
+  font-size: 0.75em !important;
+  vertical-align: 0.4em;
   margin: 0 0.15em;
-  vertical-align: super;
+  line-height: 1;
+  font-family: inherit;
 }
 
 /* Ayah number */
 .tiptap .ayah-number {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 2em;
-  height: 2em;
-  border: 2px solid var(--color-gold-500);
-  border-radius: 50%;
-  font-size: 0.7em;
+  display: inline-block;
+  color: inherit;
+  font-family: inherit;
+  font-size: 1em;
   margin: 0 0.25em;
-  color: var(--color-gold-700);
-  font-family: var(--font-ui);
+  white-space: nowrap;
+  line-height: inherit;
 }
 
 /* Scrollbar styling */
