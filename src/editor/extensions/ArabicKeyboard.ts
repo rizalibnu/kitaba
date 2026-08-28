@@ -140,6 +140,24 @@ export const ArabicKeyboard = Extension.create({
   addProseMirrorPlugins() {
     const comboMachine = new RegularComboStateMachine();
     let isFastWordPending = false;
+    let pendingSpecialGroup: number | null = null;
+    let pendingSpecialTimer: ReturnType<typeof setTimeout> | null = null;
+
+    const setPendingGroup = (grp: number) => {
+      pendingSpecialGroup = grp;
+      if (pendingSpecialTimer) clearTimeout(pendingSpecialTimer);
+      pendingSpecialTimer = setTimeout(() => {
+        pendingSpecialGroup = null;
+      }, 4000);
+    };
+
+    const clearPendingGroup = () => {
+      pendingSpecialGroup = null;
+      if (pendingSpecialTimer) {
+        clearTimeout(pendingSpecialTimer);
+        pendingSpecialTimer = null;
+      }
+    };
 
     return [
       new Plugin({
@@ -207,10 +225,34 @@ export const ArabicKeyboard = Extension.create({
               }
             }
 
-            // 2. Alt + W (or Option + W on Mac / Linux): Trigger FastWord waiting mode
+            // 2. Handle pendingSpecialGroup when Alt has been released:
+            // Skenario: (Alt + [1-5]) -> Lepas Alt -> Tekan huruf A-K untuk menyisipkan karakter baris BAWAH!
+            if (pendingSpecialGroup !== null && !event.ctrlKey && !event.metaKey && !isAltKey) {
+              const charKeyMatch = event.code.match(/^Key([A-Ka-k])$/i) || event.key.match(/^[a-kA-K]$/i);
+              if (charKeyMatch) {
+                const letter = (charKeyMatch[1] || event.key).toUpperCase();
+                const group = SPECIAL_CHARACTER_GROUPS.find((g) => g.id === pendingSpecialGroup) || SPECIAL_CHARACTER_GROUPS[0];
+                const item = group.items.find((it) => it.keyLetter.toUpperCase() === letter);
+                if (item) {
+                  event.preventDefault();
+                  flushCombo();
+                  clearPendingGroup();
+                  // Sisipkan karakter baris bawah
+                  commitText(item.charBottom);
+                  return true;
+                }
+              }
+              // If non-shift key pressed, clear pending group
+              if (event.key !== 'Shift') {
+                clearPendingGroup();
+              }
+            }
+
+            // 3. Alt + W (or Option + W on Mac / Linux): Trigger FastWord waiting mode
             if (isAltKey && isKeyW) {
               event.preventDefault();
               flushCombo();
+              clearPendingGroup();
               isFastWordPending = true;
               // Reset pending after 4 seconds if no key is pressed
               setTimeout(() => {
@@ -219,7 +261,7 @@ export const ArabicKeyboard = Extension.create({
               return true;
             }
 
-            // 3. Alt + 1..5: Open Special Characters group tab
+            // 4. Alt + 1..5: Open Special Characters group tab & set pending group
             if (isAltKey && (/^[1-5]$/.test(event.key) || /^Digit[1-5]$/.test(event.code))) {
               event.preventDefault();
               flushCombo();
@@ -227,20 +269,23 @@ export const ArabicKeyboard = Extension.create({
               const grpNum = digitMatch ? parseInt(digitMatch[1] || digitMatch[0], 10) : 1;
               useUIStore.getState().setSpecialCharactersOpen(true);
               useUIStore.getState().setSpecialCharactersGroup(grpNum);
+              setPendingGroup(grpNum);
               return true;
             }
 
-            // 4. Alt + [A-K]: Insert Special Character from current active group
+            // 5. Alt + [A-K]: Insert Special Character (Alt + Group, Huruf):
+            // Jika Alt tetap ditahan: menyisipkan karakter baris ATAS (atau bawah jika ada shift)
             if (isAltKey && !isKeyW && !event.ctrlKey && !event.metaKey) {
               const charKeyMatch = event.code.match(/^Key([A-Ka-k])$/i) || event.key.match(/^[a-kA-K]$/i);
               if (charKeyMatch) {
                 const letter = (charKeyMatch[1] || event.key).toUpperCase();
-                const activeGroupNum = useUIStore.getState().specialCharactersGroup || 1;
+                const activeGroupNum = pendingSpecialGroup || useUIStore.getState().specialCharactersGroup || 1;
                 const group = SPECIAL_CHARACTER_GROUPS.find((g) => g.id === activeGroupNum) || SPECIAL_CHARACTER_GROUPS[0];
                 const item = group.items.find((it) => it.keyLetter.toUpperCase() === letter);
                 if (item) {
                   event.preventDefault();
                   flushCombo();
+                  clearPendingGroup();
                   const insertChar = event.shiftKey ? item.charBottom : item.charTop;
                   commitText(insertChar);
                   return true;
