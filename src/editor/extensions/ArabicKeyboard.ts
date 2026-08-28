@@ -21,6 +21,14 @@ export const ArabicKeyboard = Extension.create({
         useUIStore.getState().toggleSpecialCharacters();
         return true;
       },
+      'Mod-Shift-h': () => {
+        useUIStore.getState().toggleHarakatPalette();
+        return true;
+      },
+      'Mod-Shift-H': () => {
+        useUIStore.getState().toggleHarakatPalette();
+        return true;
+      },
       'Mod-f': () => {
         useEditorStore.getState().toggleAutoReplace();
         return true;

@@ -19,6 +19,7 @@ import {
   BookmarkPlus,
   Keyboard,
   Sparkles,
+  Layers,
   ZoomIn,
   ZoomOut,
   Upload,
@@ -55,6 +56,8 @@ export function Toolbar() {
   const setActiveDialog = useUIStore((s) => s.setActiveDialog);
   const toggleSpecialCharacters = useUIStore((s) => s.toggleSpecialCharacters);
   const specialCharactersOpen = useUIStore((s) => s.specialCharactersOpen);
+  const toggleHarakatPalette = useUIStore((s) => s.toggleHarakatPalette);
+  const harakatPaletteOpen = useUIStore((s) => s.harakatPaletteOpen);
   const toggleVirtualKeyboard = useUIStore((s) => s.toggleVirtualKeyboard);
   const virtualKeyboardOpen = useUIStore((s) => s.virtualKeyboardOpen);
 
@@ -292,6 +295,14 @@ export function Toolbar() {
         label="Special Characters Panel (Ctrl+K)"
         active={specialCharactersOpen}
         onClick={toggleSpecialCharacters}
+      />
+
+      {/* Group: Harakat Palette Toggle */}
+      <ToolbarIconButton
+        icon={Layers}
+        label="Panel Tanda Harakat (Ctrl+Shift+H / Alt+H)"
+        active={harakatPaletteOpen}
+        onClick={toggleHarakatPalette}
       />
 
       {/* Group 11: FastWord Edit Icon */}

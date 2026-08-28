@@ -156,6 +156,12 @@ export function NaskhEditor() {
           }
         }
 
+        // Harakat Palette Toggle (Ctrl+Shift+H)
+        else if (keyLower === 'h' && e.shiftKey) {
+          e.preventDefault();
+          useUIStore.getState().toggleHarakatPalette();
+        }
+
         // Special Characters Panel Toggle (Ctrl+K)
         else if (keyLower === 'k') {
           e.preventDefault();

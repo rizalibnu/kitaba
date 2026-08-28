@@ -85,6 +85,8 @@ export function MenuBar() {
   const specialCharactersOpen = useUIStore((s) => s.specialCharactersOpen);
   const sidebarOpen = useUIStore((s) => s.sidebarOpen);
   const toggleSidebar = useUIStore((s) => s.toggleSidebar);
+  const harakatPaletteOpen = useUIStore((s) => s.harakatPaletteOpen);
+  const toggleHarakatPalette = useUIStore((s) => s.toggleHarakatPalette);
   const virtualKeyboardOpen = useUIStore((s) => s.virtualKeyboardOpen);
   const toggleVirtualKeyboard = useUIStore((s) => s.toggleVirtualKeyboard);
   const statusBarVisible = useUIStore((s) => s.statusBarVisible);
@@ -312,6 +314,22 @@ export function MenuBar() {
           icon: PanelLeft,
           checked: sidebarOpen,
           action: () => toggleSidebar(),
+        },
+        {
+          id: 'toggleHarakat',
+          label: 'Panel Tanda Harakat',
+          icon: Sparkles,
+          shortcut: 'Ctrl+Shift+H',
+          checked: harakatPaletteOpen,
+          action: () => toggleHarakatPalette(),
+        },
+        {
+          id: 'toggleSpecialChars',
+          label: 'Panel Karakter Spesial',
+          icon: Sparkles,
+          shortcut: 'Ctrl+K',
+          checked: specialCharactersOpen,
+          action: () => toggleSpecialCharacters(),
         },
         {
           id: 'toggleVirtualKb',
