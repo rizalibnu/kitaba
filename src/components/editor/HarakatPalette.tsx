@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNaskhEditor } from '@/editor/EditorContext';
 import { useUIStore } from '@/stores/uiStore';
-import { HARAKAT_MAP, HARAKAT_NAMES } from '@/editor/keyboardMaps';
+import { HARAKAT_CATEGORIES, type HarakatItem } from '@/editor/keyboardMaps';
 import { X, Sparkles } from 'lucide-react';
 
 export function HarakatPalette() {
@@ -12,100 +12,167 @@ export function HarakatPalette() {
   const harakatPaletteOpen = useUIStore((s) => s.harakatPaletteOpen);
   const setHarakatPaletteOpen = useUIStore((s) => s.setHarakatPaletteOpen);
 
-  const [activeFKey, setActiveFKey] = useState<string | null>(null);
+  const [activeCategory, setActiveCategory] = useState<'all' | 'single' | 'tasydid' | 'maddah'>('all');
+  const [pressedId, setPressedId] = useState<string | null>(null);
 
   if (!harakatPaletteOpen) return null;
 
-  const getHarakatName = (fkey: string) => {
-    const info = HARAKAT_NAMES[fkey];
-    if (!info) return fkey;
-    const lang = i18n.language;
-    if (lang === 'ar') return info.ar;
-    if (lang === 'id') return info.id;
-    return info.en;
-  };
-
-  const getHarakatChar = (fkey: string) => {
-    const mark = HARAKAT_MAP[fkey];
-    if (!mark) return '';
-    return Array.isArray(mark) ? mark.join('') : mark;
-  };
-
-  const handleInsert = (fkey: string) => {
-    setActiveFKey(fkey);
-    setTimeout(() => setActiveFKey(null), 120);
+  const handleInsert = (item: HarakatItem) => {
+    setPressedId(item.id);
+    setTimeout(() => setPressedId(null), 150);
 
     if (!editor) return;
-    const char = getHarakatChar(fkey);
-    editor.chain().focus().insertContent(char).run();
+
+    // Remove existing harakat before cursor and insert new one
+    const { state } = editor;
+    const { from } = state.selection;
+    let deleteFrom = from;
+    const HARAKAT_REGEX = /[\u064B-\u065F\u0670\u06D6-\u06ED]/;
+
+    while (deleteFrom > 0) {
+      const charBefore = state.doc.textBetween(deleteFrom - 1, deleteFrom, '');
+      if (charBefore && HARAKAT_REGEX.test(charBefore)) {
+        deleteFrom--;
+      } else {
+        break;
+      }
+    }
+
+    if (deleteFrom < from) {
+      editor.chain().focus().deleteRange({ from: deleteFrom, to: from }).insertContent(item.char).run();
+    } else {
+      editor.chain().focus().insertContent(item.char).run();
+    }
   };
 
-  const fkeys = [
-    'F1',
-    'F2',
-    'F3',
-    'F4',
-    'F5',
-    'F6',
-    'F7',
-    'F8',
-    'F9',
-    'F10',
-    'F11',
-    'F12',
-  ];
+  const getCategoryTitle = (cat: typeof HARAKAT_CATEGORIES[0]) => {
+    const lang = i18n.language;
+    if (lang === 'ar') return cat.titleAr;
+    if (lang === 'en') return cat.titleEn;
+    return cat.titleId;
+  };
+
+  const getItemName = (item: HarakatItem) => {
+    const lang = i18n.language;
+    if (lang === 'ar') return item.nameAr;
+    if (lang === 'en') return item.nameEn;
+    return item.nameId;
+  };
+
+  const visibleCategories =
+    activeCategory === 'all'
+      ? HARAKAT_CATEGORIES
+      : HARAKAT_CATEGORIES.filter((c) => c.id === activeCategory);
 
   return (
-    <div className="bg-amber-50/90 dark:bg-gray-800/95 border-b border-amber-200/70 dark:border-gray-700/80 px-3 py-2 flex items-center justify-between gap-3 shadow-xs z-20 backdrop-blur-xs">
-      <div className="flex items-center gap-2 shrink-0">
-        <Sparkles size={14} className="text-amber-600 dark:text-amber-400" />
-        <span className="text-xs font-semibold text-amber-900 dark:text-amber-200 hidden sm:inline">
-          {t('harakat.title', 'Harakat Palette')}
-        </span>
-      </div>
+    <div className="border-b-2 border-amber-500/40 bg-[#EDEAE0] dark:bg-gray-900 text-gray-900 dark:text-gray-100 shadow-xl z-20 transition-all select-none">
+      {/* Top Bar / Category Switcher */}
+      <div className="flex items-center justify-between px-3 sm:px-6 py-2 bg-[#DED9CA] dark:bg-gray-950 border-b border-gray-300 dark:border-gray-800 text-xs">
+        <div className="flex items-center gap-2.5">
+          <Sparkles size={16} className="text-amber-700 dark:text-amber-400" />
+          <span className="font-bold tracking-wide text-gray-900 dark:text-gray-100 text-xs sm:text-sm">
+            {t('harakat.panelTitle', 'Panel Tanda Harakat & Tashkeel')}
+          </span>
+          <span className="hidden md:inline text-[11px] text-gray-600 dark:text-gray-400 font-mono bg-black/5 dark:bg-white/5 px-2 py-0.5 rounded">
+            F1 - F10 • Shift+F1..F10 • Ctrl+F1..F10
+          </span>
+        </div>
 
-      {/* Horizontal Strip of Harakat */}
-      <div
-        className="flex items-center gap-1.5 overflow-x-auto py-0.5 scrollbar-thin max-w-4xl"
-        dir="rtl"
-      >
-        {fkeys.map((fkey) => {
-          const char = getHarakatChar(fkey);
-          const name = getHarakatName(fkey);
-          const isPressed = activeFKey === fkey;
-
-          return (
+        {/* Filter Buttons */}
+        <div className="flex items-center gap-1.5 overflow-x-auto">
+          <button
+            onClick={() => setActiveCategory('all')}
+            className={`px-2.5 py-1 text-xs font-semibold rounded-md transition-all cursor-pointer ${
+              activeCategory === 'all'
+                ? 'bg-amber-700 text-white shadow-xs'
+                : 'bg-white/60 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-white dark:hover:bg-gray-700'
+            }`}
+          >
+            Semua (All)
+          </button>
+          {HARAKAT_CATEGORIES.map((cat) => (
             <button
-              key={fkey}
-              type="button"
-              onClick={() => handleInsert(fkey)}
-              title={`${name} (${fkey})`}
-              className={`group flex flex-col items-center justify-center min-w-[2.75rem] h-12 px-1 rounded-lg border border-amber-200/70 dark:border-gray-700 bg-white dark:bg-gray-900/90 hover:bg-amber-100/70 dark:hover:bg-amber-950/40 hover:border-amber-400/80 dark:hover:border-amber-500/80 shadow-2xs hover:shadow-xs transition-all ${
-                isPressed ? 'scale-90 bg-amber-200 dark:bg-amber-900' : ''
+              key={cat.id}
+              onClick={() => setActiveCategory(cat.id as any)}
+              className={`px-2.5 py-1 text-xs font-semibold rounded-md transition-all cursor-pointer whitespace-nowrap ${
+                activeCategory === cat.id
+                  ? 'bg-amber-700 text-white shadow-xs'
+                : 'bg-white/60 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-white dark:hover:bg-gray-700'
               }`}
             >
-              {/* Arabic character with dotted circle placeholder or sample letter */}
-              <span className="text-lg font-arabic font-bold text-amber-800 dark:text-amber-300 leading-tight group-hover:scale-110 transition-transform">
-                {`ـ${char}`}
-              </span>
-              {/* F-Key badge */}
-              <span className="text-[9px] font-mono font-bold text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-800 px-1 rounded-sm mt-0.5">
-                {fkey}
-              </span>
+              {cat.id === 'single'
+                ? 'Tunggal (F1-F10)'
+                : cat.id === 'tasydid'
+                ? 'Tasydid (Shift+F)'
+                : 'Maddah (Ctrl+F)'}
             </button>
-          );
-        })}
+          ))}
+        </div>
+
+        {/* Close Button */}
+        <button
+          onClick={() => setHarakatPaletteOpen(false)}
+          className="p-1 rounded-md hover:bg-black/10 dark:hover:bg-white/10 text-gray-600 dark:text-gray-300 transition-colors cursor-pointer ml-2"
+          title="Tutup Panel Harakat"
+        >
+          <X size={16} />
+        </button>
       </div>
 
-      {/* Close button */}
-      <button
-        type="button"
-        onClick={() => setHarakatPaletteOpen(false)}
-        className="p-1.5 rounded-lg text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 hover:bg-amber-200/50 dark:hover:bg-gray-700 transition-colors shrink-0"
-        title="Close Palette"
-      >
-        <X size={16} />
-      </button>
+      {/* Content Columns / Grid */}
+      <div className="p-3 sm:p-4 overflow-x-auto max-h-72">
+        <div className="flex flex-wrap lg:flex-nowrap items-start justify-center gap-4 min-w-max mx-auto">
+          {visibleCategories.map((category) => (
+            <div
+              key={category.id}
+              className="flex flex-col bg-white/70 dark:bg-gray-800/80 rounded-xl border border-gray-300 dark:border-gray-700 p-2.5 shadow-2xs"
+            >
+              {/* Category Header */}
+              <div className="text-[11px] font-bold text-amber-900 dark:text-amber-300 pb-1.5 mb-2 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between gap-2">
+                <span>{getCategoryTitle(category)}</span>
+                <span className="text-[10px] font-mono text-gray-500 dark:text-gray-400">
+                  {category.items.length} item
+                </span>
+              </div>
+
+              {/* Items row */}
+              <div className="flex items-center gap-2">
+                {category.items.map((item) => {
+                  const isPressed = pressedId === item.id;
+                  return (
+                    <button
+                      key={item.id}
+                      onClick={() => handleInsert(item)}
+                      title={`${getItemName(item)} (${item.shortcut})`}
+                      className={`group flex flex-col items-center justify-between w-12 h-20 p-1 bg-white dark:bg-gray-900 rounded-lg border border-gray-300 dark:border-gray-700 hover:border-amber-500 hover:shadow-md transition-all cursor-pointer ${
+                        isPressed ? 'scale-90 bg-amber-200 dark:bg-amber-900' : ''
+                      }`}
+                    >
+                      {/* Shortcut Badge */}
+                      <span className="text-[9px] font-mono font-bold text-amber-800 dark:text-amber-400 bg-amber-100 dark:bg-amber-950/80 px-1 py-0.2 rounded-xs leading-none">
+                        {item.shortcut.replace('Shift + ', 'S+').replace('Ctrl + ', 'C+')}
+                      </span>
+
+                      {/* Preview Character (e.g. بَ , بِّ , بّٓ) */}
+                      <span
+                        className="text-2xl font-arabic font-bold text-gray-900 dark:text-white leading-none my-auto group-hover:scale-115 transition-transform"
+                        dir="rtl"
+                      >
+                        {item.sampleWithBa}
+                      </span>
+
+                      {/* Harakat Label name */}
+                      <span className="text-[8px] text-gray-600 dark:text-gray-400 truncate max-w-full text-center leading-tight">
+                        {getItemName(item)}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
     </div>
   );
 }

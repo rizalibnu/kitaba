@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Dialog } from '@/components/common/Dialog';
 import { useUIStore } from '@/stores/uiStore';
-import { HARAKAT_MAP, HARAKAT_NAMES } from '@/editor/keyboardMaps';
+import { HARAKAT_CATEGORIES } from '@/editor/keyboardMaps';
 import {
   Keyboard,
   FileText,
@@ -23,7 +23,7 @@ interface ShortcutItem {
 }
 
 interface ShortcutSection {
-  id: 'harakat' | 'editing' | 'general' | 'navigation';
+  id: 'harakat' | 'special' | 'editing' | 'general' | 'navigation';
   titleKey: string;
   defaultTitle: string;
   icon: typeof Keyboard;
@@ -50,27 +50,18 @@ export function KeyboardShortcutsDialog({
     }
   };
 
-  const getHarakatName = (key: string) => {
-    const info = HARAKAT_NAMES[key];
-    if (!info) return key;
-    const lang = i18n.language;
-    if (lang === 'ar') return info.ar;
-    if (lang === 'id') return info.id;
-    return info.en;
-  };
-
-  const getHarakatChar = (key: string) => {
-    const mark = HARAKAT_MAP[key];
-    if (!mark) return '';
-    return Array.isArray(mark) ? mark.join('') : mark;
-  };
-
-  // Build harakat list items from F1-F12
-  const harakatItems: ShortcutItem[] = Object.keys(HARAKAT_NAMES).map((fkey) => ({
-    keys: [fkey],
-    description: getHarakatName(fkey),
-    charPreview: `ب${getHarakatChar(fkey)}`,
-  }));
+  // Build harakat list items from HARAKAT_CATEGORIES
+  const harakatItems: ShortcutItem[] = HARAKAT_CATEGORIES.flatMap((cat) =>
+    cat.items.map((item) => {
+      const lang = i18n.language;
+      const desc = lang === 'ar' ? item.nameAr : lang === 'en' ? item.nameEn : item.nameId;
+      return {
+        keys: [item.shortcut],
+        description: `${desc} (${cat.id === 'single' ? 'Tunggal' : cat.id === 'tasydid' ? 'Tasydid' : 'Maddah'})`,
+        charPreview: item.sampleWithBa,
+      };
+    })
+  );
 
   const sections: ShortcutSection[] = [
     {

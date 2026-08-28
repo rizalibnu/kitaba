@@ -2,7 +2,7 @@ import { Extension } from '@tiptap/core';
 import { Plugin, PluginKey } from '@tiptap/pm/state';
 import {
   getArabicChar,
-  getHarakat,
+  getHarakatFromShortcut,
   RegularComboStateMachine,
 } from '@/editor/keyboardMaps';
 import { useKeyboardStore } from '@/stores/keyboardStore';
@@ -293,7 +293,7 @@ export const ArabicKeyboard = Extension.create({
               }
             }
 
-            // 4. Function Keys (F1 - F12)
+            // 6. Function Keys (F1 - F12) for Harakat & Waqaf
             if (/^F([1-9]|1[0-2])$/.test(upperKey)) {
               const settings = useSettingsStore.getState();
               if (settings.enableFKeyShortcuts) {
@@ -313,64 +313,24 @@ export const ArabicKeyboard = Extension.create({
                   return true;
                 }
 
-                // Shift + F1: Fathah tegak / Alif khanjariyah (ـٰ)
-                if (upperKey === 'F1' && event.shiftKey) {
+                // Lookup Harakat based on Nonosoft specification matrix:
+                // Column 1: F1..F10 (Single Harakat)
+                // Column 2: Shift + F1..F10 (Tasydid + Harakat / Maddah)
+                // Column 3: Ctrl + F1..F6, Ctrl + F10 (Maddah + Harakat / Special Tasydid)
+                const isCtrl = Boolean(event.ctrlKey || event.metaKey);
+                const harakatChar = getHarakatFromShortcut(upperKey, event.shiftKey, isCtrl);
+                if (harakatChar) {
                   event.preventDefault();
                   flushCombo();
-                  commitHarakat('\u0670');
+                  commitHarakat(harakatChar);
                   return true;
                 }
 
-                // Shift + F2: Kasrah tegak (ـٖ)
-                if (upperKey === 'F2' && event.shiftKey) {
+                // Fallback F11 (Sukun Qurani)
+                if (upperKey === 'F11') {
                   event.preventDefault();
                   flushCombo();
-                  commitHarakat('\u0656');
-                  return true;
-                }
-
-                // Shift + F3: Dhammah terbalik (ـٗ)
-                if (upperKey === 'F3' && event.shiftKey) {
-                  event.preventDefault();
-                  flushCombo();
-                  commitHarakat('\u0657');
-                  return true;
-                }
-
-                // Shift + F7: Tanda Tashil (ء)
-                if (upperKey === 'F7' && event.shiftKey) {
-                  event.preventDefault();
-                  flushCombo();
-                  commitText('\u0621');
-                  return true;
-                }
-
-                // Shift + F8: Tanda Imalah
-                if (upperKey === 'F8' && event.shiftKey) {
-                  event.preventDefault();
-                  flushCombo();
-                  commitHarakat('\u06EC');
-                  return true;
-                }
-
-                // Shift + F9: Tanda Isymam
-                if (upperKey === 'F9' && event.shiftKey) {
-                  event.preventDefault();
-                  flushCombo();
-                  commitHarakat('\u06ED');
-                  return true;
-                }
-
-                // Standard F1-F11 Harakat
-                const harakat = getHarakat(upperKey);
-                if (harakat) {
-                  event.preventDefault();
-                  flushCombo();
-                  if (Array.isArray(harakat)) {
-                    commitHarakat(harakat.join(''));
-                  } else {
-                    commitHarakat(harakat);
-                  }
+                  commitHarakat('\u06E1');
                   return true;
                 }
               }

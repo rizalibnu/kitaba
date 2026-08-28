@@ -19,8 +19,12 @@ import { ARABIC_MAP, ARABIC_SHIFT_MAP } from './arabicMap.ts';
 import {
   HARAKAT_MAP,
   HARAKAT_NAMES,
+  HARAKAT_CATEGORIES,
+  getHarakatFromShortcut,
   type HarakatKey,
   type HarakatNameInfo,
+  type HarakatItem,
+  type HarakatCategory,
 } from './harakatMap.ts';
 
 export type KeyboardMode = 'regular' | 'standard' | 'arabic';
@@ -36,9 +40,11 @@ export {
   ARABIC_SHIFT_MAP,
   HARAKAT_MAP,
   HARAKAT_NAMES,
+  HARAKAT_CATEGORIES,
+  getHarakatFromShortcut,
 };
 
-export type { HarakatKey, HarakatNameInfo };
+export type { HarakatKey, HarakatNameInfo, HarakatItem, HarakatCategory };
 
 /**
  * Looks up the corresponding Arabic character for a given key and keyboard mode.
