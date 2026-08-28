@@ -19,6 +19,7 @@ import { ExportDialog } from '@/components/dialogs/ExportDialog';
 import { FastWordDialog } from '@/components/dialogs/FastWordDialog';
 import { KeyboardShortcutsDialog } from '@/components/dialogs/KeyboardShortcutsDialog';
 import { AboutDialog } from '@/components/dialogs/AboutDialog';
+import { PwaUpdatePrompt } from '@/components/common/PwaUpdatePrompt';
 import { Agentation } from 'agentation';
 
 export default function App() {
@@ -188,6 +189,9 @@ export default function App() {
         open={activeDialog === 'about'}
         onClose={() => setActiveDialog(null)}
       />
+
+      {/* PWA Update Notification Prompt */}
+      <PwaUpdatePrompt />
 
       {/* Agentation Visual Feedback (Development Mode Only) */}
       {import.meta.env.DEV && <Agentation />}

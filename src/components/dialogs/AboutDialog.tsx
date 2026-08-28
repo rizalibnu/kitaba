@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Dialog } from '@/components/common/Dialog';
 import { useUIStore } from '@/stores/uiStore';
@@ -10,6 +11,8 @@ import {
   Code2,
   Heart,
   ExternalLink,
+  RefreshCw,
+  CheckCircle,
 } from 'lucide-react';
 
 interface AboutDialogProps {
@@ -22,12 +25,44 @@ export function AboutDialog({ open, onClose }: AboutDialogProps) {
   const activeDialog = useUIStore((s) => s.activeDialog);
   const closeDialog = useUIStore((s) => s.closeDialog);
 
+  const [checkingUpdate, setCheckingUpdate] = useState(false);
+  const [updateStatus, setUpdateStatus] = useState<string | null>(null);
+
   const isOpen = open !== undefined ? open : activeDialog === 'about';
   const handleClose = () => {
     if (onClose) {
       onClose();
     } else {
       closeDialog();
+    }
+  };
+
+  const handleCheckUpdate = async () => {
+    if (!('serviceWorker' in navigator)) {
+      setUpdateStatus('Browser tidak mendukung Service Worker / PWA.');
+      return;
+    }
+
+    setCheckingUpdate(true);
+    setUpdateStatus(null);
+
+    try {
+      const registration = await navigator.serviceWorker.getRegistration();
+      if (registration) {
+        await registration.update();
+        setTimeout(() => {
+          setCheckingUpdate(false);
+          setUpdateStatus('Versi Kitaba Anda saat ini sudah yang paling mutakhir!');
+        }, 1000);
+      } else {
+        setTimeout(() => {
+          setCheckingUpdate(false);
+          setUpdateStatus('Aplikasi siap untuk pembaruan online.');
+        }, 800);
+      }
+    } catch {
+      setCheckingUpdate(false);
+      setUpdateStatus('Gagal memeriksa pembaruan. Periksa koneksi internet Anda.');
     }
   };
 
@@ -162,6 +197,24 @@ export function AboutDialog({ open, onClose }: AboutDialogProps) {
               <ExternalLink size={10} />
             </a>
           </div>
+        </div>
+
+        {/* PWA Update Checker */}
+        <div className="flex flex-col items-center gap-2 pt-2 border-t border-gray-100 dark:border-gray-700/60">
+          <button
+            onClick={handleCheckUpdate}
+            disabled={checkingUpdate}
+            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-amber-900 dark:text-amber-200 bg-amber-100/70 dark:bg-amber-950/60 hover:bg-amber-200 dark:hover:bg-amber-900/80 border border-amber-300 dark:border-amber-700 rounded-lg transition-colors cursor-pointer disabled:opacity-50"
+          >
+            <RefreshCw size={13} className={checkingUpdate ? 'animate-spin' : ''} />
+            <span>{checkingUpdate ? 'Memeriksa Pembaruan...' : 'Periksa Pembaruan Kitaba'}</span>
+          </button>
+          {updateStatus && (
+            <div className="flex items-center gap-1.5 text-[11px] font-medium text-emerald-600 dark:text-emerald-400 text-center animate-in fade-in">
+              <CheckCircle size={13} />
+              <span>{updateStatus}</span>
+            </div>
+          )}
         </div>
 
         {/* Footer credits */}
