@@ -52,27 +52,6 @@ export function NaskhEditor() {
     return () => container.removeEventListener('wheel', handleWheel);
   }, [zoomIn, zoomOut]);
 
-  // Global Keyboard shortcuts for Zoom (Ctrl/Cmd + Plus, Minus, 0)
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.ctrlKey || e.metaKey) {
-        if (e.key === '=' || e.key === '+') {
-          e.preventDefault();
-          zoomIn(10);
-        } else if (e.key === '-' || e.key === '_') {
-          e.preventDefault();
-          zoomOut(10);
-        } else if (e.key === '0') {
-          e.preventDefault();
-          resetZoom();
-        }
-      }
-    };
-
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [zoomIn, zoomOut, resetZoom]);
-
   // Resolve CSS font family
   const resolvedFont =
     AVAILABLE_FONTS.find((f) => f.family === fontFamily)?.cssFamily ||
@@ -113,6 +92,74 @@ export function NaskhEditor() {
       }
     },
   });
+
+  // Global Keyboard shortcuts for Zoom and Formatting (Ctrl/Cmd + Keys)
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.ctrlKey || e.metaKey) {
+        const keyLower = e.key.toLowerCase();
+
+        // Zoom shortcuts
+        if (e.key === '=' || e.key === '+') {
+          e.preventDefault();
+          zoomIn(10);
+        } else if (e.key === '-' || e.key === '_') {
+          e.preventDefault();
+          zoomOut(10);
+        } else if (e.key === '0') {
+          e.preventDefault();
+          resetZoom();
+        }
+
+        // Formatting Shortcuts
+        else if (keyLower === 'b') {
+          e.preventDefault();
+          editor?.chain().focus().toggleBold().run();
+        } else if (keyLower === 'i') {
+          e.preventDefault();
+          editor?.chain().focus().toggleItalic().run();
+        } else if (keyLower === 'u') {
+          e.preventDefault();
+          editor?.chain().focus().toggleUnderline().run();
+        }
+
+        // Alignment Shortcuts
+        else if (keyLower === 'r') {
+          e.preventDefault();
+          editor?.chain().focus().setTextAlign('right').run();
+        } else if (keyLower === 'e') {
+          e.preventDefault();
+          editor?.chain().focus().setTextAlign('center').run();
+        } else if (keyLower === 'l') {
+          e.preventDefault();
+          editor?.chain().focus().setTextAlign('left').run();
+        } else if (keyLower === 'j') {
+          e.preventDefault();
+          editor?.chain().focus().setTextAlign('justify').run();
+        }
+
+        // Font Size Shortcuts
+        else if (keyLower === 'h' || e.key === ']') {
+          e.preventDefault();
+          useEditorStore.getState().setFontSize(fontSize + 2);
+        } else if (keyLower === 'd' || e.key === '[') {
+          e.preventDefault();
+          useEditorStore.getState().setFontSize(Math.max(8, fontSize - 2));
+        }
+
+        // Document Save (Ctrl+S)
+        else if (keyLower === 's') {
+          e.preventDefault();
+          if (activeDoc) {
+            useDocumentStore.getState().markDocumentSaved(activeDoc.id);
+          }
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [editor, activeDoc, fontSize, zoomIn, zoomOut, resetZoom]);
 
   // Track global active editor instance for toolbars and dialogs
   useEffect(() => {

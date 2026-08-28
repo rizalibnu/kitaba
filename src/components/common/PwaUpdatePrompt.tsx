@@ -1,10 +1,11 @@
-import { useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useRegisterSW } from 'virtual:pwa-register/react';
 import { Sparkles, RefreshCw, X, CheckCircle2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 export function PwaUpdatePrompt() {
   const { t } = useTranslation();
+  const [isUpdating, setIsUpdating] = useState(false);
 
   const {
     offlineReady: [offlineReady, setOfflineReady],
@@ -24,8 +25,24 @@ export function PwaUpdatePrompt() {
     },
   });
 
+  // Prevent immediate re-showing of prompt if we just reloaded
+  const isRecentlyUpdated = () => {
+    try {
+      const lastUpdate = sessionStorage.getItem('kitaba_sw_updated');
+      if (lastUpdate && Date.now() - parseInt(lastUpdate, 10) < 15000) {
+        return true;
+      }
+    } catch {}
+    return false;
+  };
+
   // Check for updates when the user returns to the tab or reconnects online
   useEffect(() => {
+    if (isRecentlyUpdated()) {
+      setNeedRefresh(false);
+      return;
+    }
+
     const handleCheckUpdate = () => {
       if ('serviceWorker' in navigator) {
         navigator.serviceWorker.getRegistration().then((reg) => {
@@ -43,6 +60,13 @@ export function PwaUpdatePrompt() {
   }, []);
 
   const handleUpdateNow = () => {
+    setIsUpdating(true);
+    try {
+      sessionStorage.setItem('kitaba_sw_updated', Date.now().toString());
+    } catch {}
+
+    // Tell service worker to skip waiting and reload the page
+    setNeedRefresh(false);
     updateServiceWorker(true);
   };
 
@@ -51,7 +75,7 @@ export function PwaUpdatePrompt() {
     setNeedRefresh(false);
   };
 
-  if (!needRefresh && !offlineReady) {
+  if ((!needRefresh && !offlineReady) || isRecentlyUpdated()) {
     return null;
   }
 
@@ -62,7 +86,7 @@ export function PwaUpdatePrompt() {
           <div className="flex items-center gap-2.5">
             {needRefresh ? (
               <div className="p-2 bg-amber-100 dark:bg-amber-950/80 text-amber-600 dark:text-amber-400 rounded-lg">
-                <Sparkles size={20} className="animate-pulse" />
+                <Sparkles size={20} className="text-amber-600 dark:text-amber-400" />
               </div>
             ) : (
               <div className="p-2 bg-emerald-100 dark:bg-emerald-950/80 text-emerald-600 dark:text-emerald-400 rounded-lg">
@@ -90,7 +114,7 @@ export function PwaUpdatePrompt() {
           </div>
           <button
             onClick={handleClose}
-            className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 p-1 rounded-md transition-colors"
+            className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 p-1 rounded-md transition-colors cursor-pointer"
             title="Tutup"
           >
             <X size={16} />
@@ -101,16 +125,17 @@ export function PwaUpdatePrompt() {
           <div className="flex items-center justify-end gap-2 pt-1 border-t border-gray-100 dark:border-gray-700/60">
             <button
               onClick={handleClose}
-              className="px-3 py-1.5 text-xs font-medium text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md transition-colors"
+              className="px-3 py-1.5 text-xs font-medium text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md transition-colors cursor-pointer"
             >
               {t('pwa.later', 'Nanti')}
             </button>
             <button
               onClick={handleUpdateNow}
-              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-white bg-amber-600 hover:bg-amber-700 active:bg-amber-800 rounded-md shadow-xs transition-colors cursor-pointer"
+              disabled={isUpdating}
+              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-white bg-amber-600 hover:bg-amber-700 active:bg-amber-800 rounded-md shadow-xs transition-colors cursor-pointer disabled:opacity-75"
             >
-              <RefreshCw size={13} className="animate-spin" />
-              <span>{t('pwa.updateNow', 'Perbarui Sekarang')}</span>
+              <RefreshCw size={13} className={isUpdating ? 'animate-spin' : ''} />
+              <span>{isUpdating ? 'Memperbarui...' : t('pwa.updateNow', 'Perbarui Sekarang')}</span>
             </button>
           </div>
         )}

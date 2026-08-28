@@ -9,6 +9,7 @@ import { useKeyboardStore } from '@/stores/keyboardStore';
 import { useSettingsStore } from '@/stores/settingsStore';
 import { useUIStore } from '@/stores/uiStore';
 import { useEditorStore } from '@/stores/editorStore';
+import { useDocumentStore } from '@/stores/documentStore';
 
 export const ArabicKeyboard = Extension.create({
   name: 'arabicKeyboard',
@@ -21,6 +22,115 @@ export const ArabicKeyboard = Extension.create({
       },
       'Mod-f': () => {
         useEditorStore.getState().toggleAutoReplace();
+        return true;
+      },
+
+      // Text Formatting Shortcuts
+      'Mod-b': () => this.editor.commands.toggleBold(),
+      'Mod-B': () => this.editor.commands.toggleBold(),
+      'Mod-i': () => this.editor.commands.toggleItalic(),
+      'Mod-I': () => this.editor.commands.toggleItalic(),
+      'Mod-u': () => this.editor.commands.toggleUnderline(),
+      'Mod-U': () => this.editor.commands.toggleUnderline(),
+
+      // Text Alignment Shortcuts (Ctrl+R, Ctrl+E, Ctrl+L, Ctrl+J)
+      'Mod-r': () => this.editor.commands.setTextAlign('right'),
+      'Mod-R': () => this.editor.commands.setTextAlign('right'),
+      'Mod-e': () => this.editor.commands.setTextAlign('center'),
+      'Mod-E': () => this.editor.commands.setTextAlign('center'),
+      'Mod-l': () => this.editor.commands.setTextAlign('left'),
+      'Mod-L': () => this.editor.commands.setTextAlign('left'),
+      'Mod-j': () => this.editor.commands.setTextAlign('justify'),
+      'Mod-J': () => this.editor.commands.setTextAlign('justify'),
+
+      'Mod-Shift-r': () => this.editor.commands.setTextAlign('right'),
+      'Mod-Shift-R': () => this.editor.commands.setTextAlign('right'),
+      'Mod-Shift-e': () => this.editor.commands.setTextAlign('center'),
+      'Mod-Shift-E': () => this.editor.commands.setTextAlign('center'),
+      'Mod-Shift-l': () => this.editor.commands.setTextAlign('left'),
+      'Mod-Shift-L': () => this.editor.commands.setTextAlign('left'),
+      'Mod-Shift-j': () => this.editor.commands.setTextAlign('justify'),
+      'Mod-Shift-J': () => this.editor.commands.setTextAlign('justify'),
+
+      // Font Size Shortcuts
+      'Mod-h': () => {
+        const currentSize = useEditorStore.getState().fontSize;
+        useEditorStore.getState().setFontSize(currentSize + 2);
+        return true;
+      },
+      'Mod-H': () => {
+        const currentSize = useEditorStore.getState().fontSize;
+        useEditorStore.getState().setFontSize(currentSize + 2);
+        return true;
+      },
+      'Mod-d': () => {
+        const currentSize = useEditorStore.getState().fontSize;
+        useEditorStore.getState().setFontSize(Math.max(8, currentSize - 2));
+        return true;
+      },
+      'Mod-D': () => {
+        const currentSize = useEditorStore.getState().fontSize;
+        useEditorStore.getState().setFontSize(Math.max(8, currentSize - 2));
+        return true;
+      },
+      'Mod-]': () => {
+        const currentSize = useEditorStore.getState().fontSize;
+        useEditorStore.getState().setFontSize(currentSize + 2);
+        return true;
+      },
+      'Mod-[': () => {
+        const currentSize = useEditorStore.getState().fontSize;
+        useEditorStore.getState().setFontSize(Math.max(8, currentSize - 2));
+        return true;
+      },
+
+      // Document Actions
+      'Mod-s': () => {
+        const activeDoc = useDocumentStore.getState().getActiveDocument();
+        if (activeDoc) {
+          useDocumentStore.getState().markDocumentSaved(activeDoc.id);
+        }
+        return true;
+      },
+      'Mod-S': () => {
+        const activeDoc = useDocumentStore.getState().getActiveDocument();
+        if (activeDoc) {
+          useDocumentStore.getState().markDocumentSaved(activeDoc.id);
+        }
+        return true;
+      },
+      'Mod-n': () => {
+        useDocumentStore.getState().createDocument();
+        return true;
+      },
+      'Mod-N': () => {
+        useDocumentStore.getState().createDocument();
+        return true;
+      },
+      'Mod-p': () => {
+        window.print();
+        return true;
+      },
+      'Mod-P': () => {
+        window.print();
+        return true;
+      },
+
+      // Zoom Shortcuts
+      'Mod-=': () => {
+        useEditorStore.getState().zoomIn(10);
+        return true;
+      },
+      'Mod-+': () => {
+        useEditorStore.getState().zoomIn(10);
+        return true;
+      },
+      'Mod--': () => {
+        useEditorStore.getState().zoomOut(10);
+        return true;
+      },
+      'Mod-0': () => {
+        useEditorStore.getState().resetZoom();
         return true;
       },
     };
