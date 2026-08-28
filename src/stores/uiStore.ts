@@ -12,6 +12,7 @@ export interface UiState {
   harakatPaletteOpen: boolean;
   specialCharactersOpen: boolean;
   specialCharactersGroup: number; // 1 to 5
+  colorPickerOpen: boolean;
   waqafDialogMode: WaqafDialogMode;
   activeDialog: string | null;
   statusBarVisible: boolean;
@@ -27,6 +28,8 @@ export interface UiState {
   setSpecialCharactersOpen: (open: boolean) => void;
   toggleSpecialCharacters: () => void;
   setSpecialCharactersGroup: (group: number) => void;
+  setColorPickerOpen: (open: boolean) => void;
+  toggleColorPicker: () => void;
   setWaqafDialogMode: (mode: WaqafDialogMode) => void;
   openWaqafDialog: (mode?: WaqafDialogMode) => void;
   setActiveDialog: (dialog: string | null) => void;
@@ -68,6 +71,7 @@ export const useUiStore = create<UiState>()(
       harakatPaletteOpen: false,
       specialCharactersOpen: false,
       specialCharactersGroup: 1,
+      colorPickerOpen: false,
       waqafDialogMode: 'end',
       activeDialog: null,
       statusBarVisible: true,
@@ -101,6 +105,12 @@ export const useUiStore = create<UiState>()(
 
       setSpecialCharactersGroup: (specialCharactersGroup: number) =>
         set({ specialCharactersGroup: Math.max(1, Math.min(5, specialCharactersGroup)) }),
+
+      setColorPickerOpen: (colorPickerOpen: boolean) =>
+        set({ colorPickerOpen }),
+
+      toggleColorPicker: () =>
+        set((state) => ({ colorPickerOpen: !state.colorPickerOpen })),
 
       setWaqafDialogMode: (waqafDialogMode: WaqafDialogMode) =>
         set({ waqafDialogMode }),

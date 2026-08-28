@@ -1,4 +1,4 @@
-import { useState, useEffect, type ElementType } from 'react';
+import { useState, useEffect, useRef, type ElementType } from 'react';
 import {
   FilePlus,
   FolderOpen,
@@ -24,6 +24,7 @@ import {
   ZoomIn,
   ZoomOut,
   Upload,
+  ChevronDown,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useUIStore } from '@/stores/uiStore';
@@ -32,11 +33,13 @@ import { useEditorStore } from '@/stores/editorStore';
 import { useNaskhEditor } from '@/editor/EditorContext';
 import { ARABIC_FONTS, LATIN_FONTS, AVAILABLE_FONTS, FONT_SIZES } from '@/types';
 import { triggerKhtImport } from '@/lib/khtImportHelper';
+import { ColorPickerPopover } from '@/components/editor';
 
 const ZOOM_PRESETS = [50, 75, 90, 100, 125, 150, 175, 200, 250, 300];
 
 export function Toolbar() {
   const editor = useNaskhEditor();
+  const colorBtnRef = useRef<HTMLButtonElement>(null);
   const [, setSelectionTick] = useState(0);
 
   useEffect(() => {
@@ -74,15 +77,12 @@ export function Toolbar() {
   const harakatPaletteOpen = useUIStore((s) => s.harakatPaletteOpen);
   const toggleVirtualKeyboard = useUIStore((s) => s.toggleVirtualKeyboard);
   const virtualKeyboardOpen = useUIStore((s) => s.virtualKeyboardOpen);
+  const colorPickerOpen = useUIStore((s) => s.colorPickerOpen);
+  const toggleColorPicker = useUIStore((s) => s.toggleColorPicker);
+  const setColorPickerOpen = useUIStore((s) => s.setColorPickerOpen);
 
   const currentFonts = fontScript === 'arabic' ? ARABIC_FONTS : LATIN_FONTS;
-
-  const handleColorPick = () => {
-    const color = prompt('Masukkan kode warna (hex):', '#000000');
-    if (color && editor) {
-      editor.chain().focus().setColor(color).run();
-    }
-  };
+  const activeColor = editor?.getAttributes('textStyle').color || '#000000';
 
   return (
     <div className="flex items-center gap-2 pl-2 sm:pl-2.5 pr-4 sm:pr-6 py-2 bg-[#EDEAE0] dark:bg-gray-900 border-b border-gray-300 dark:border-gray-700 select-none overflow-x-auto shadow-xs">
@@ -200,16 +200,36 @@ export function Toolbar() {
 
       <ToolbarSeparator />
 
-      {/* Group 5: Text Color */}
-      <button
-        onClick={handleColorPick}
-        title="Text Color (Ctrl+T)"
-        className="flex items-center justify-center w-8.5 h-8.5 rounded-md hover:bg-[#DCD8C8] dark:hover:bg-gray-800 text-gray-800 dark:text-gray-200 border border-transparent hover:border-gray-400 transition-colors"
-      >
-        <span className="font-serif font-bold text-base underline decoration-amber-600 decoration-2">
-          A
-        </span>
-      </button>
+      {/* Group 5: Text Color Picker */}
+      <div className="relative">
+        <button
+          ref={colorBtnRef}
+          onClick={toggleColorPicker}
+          title="Warna Teks / Font Color (Ctrl+T)"
+          className={cn(
+            'flex items-center gap-1 h-8.5 px-2 rounded-md transition-all border shadow-2xs cursor-pointer',
+            colorPickerOpen
+              ? 'bg-amber-100 dark:bg-gray-750 border-amber-400 dark:border-gray-500'
+              : 'bg-white dark:bg-gray-800 hover:bg-[#DCD8C8] dark:hover:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-800 dark:text-gray-200'
+          )}
+        >
+          <div className="flex flex-col items-center justify-center -space-y-0.5">
+            <span className="font-serif font-black text-sm leading-none">A</span>
+            <span
+              className="w-3.5 h-1 rounded-full shadow-2xs"
+              style={{ backgroundColor: activeColor }}
+            />
+          </div>
+          <ChevronDown size={11} className="text-gray-500 dark:text-gray-400 -mr-0.5" />
+        </button>
+
+        <ColorPickerPopover
+          editor={editor}
+          open={colorPickerOpen}
+          anchorRef={colorBtnRef}
+          onClose={() => setColorPickerOpen(false)}
+        />
+      </div>
 
       {/* Group 6: Font Script Switcher (ع / A Toggle) */}
       <button

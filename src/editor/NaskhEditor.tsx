@@ -167,6 +167,12 @@ export function NaskhEditor() {
           e.preventDefault();
           useUIStore.getState().toggleSpecialCharacters();
         }
+
+        // Font Color Picker Toggle (Ctrl+T)
+        else if (keyLower === 't') {
+          e.preventDefault();
+          useUIStore.getState().toggleColorPicker();
+        }
       }
 
       // F12 / Shift+F12: Waqaf & Nomor Ayat Dialog

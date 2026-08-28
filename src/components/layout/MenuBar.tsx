@@ -436,8 +436,7 @@ export function MenuBar() {
           icon: Palette,
           shortcut: 'Ctrl+T',
           action: () => {
-            const color = prompt('Masukkan kode warna (hex):', '#000000');
-            if (color) editor?.chain().focus().setColor(color).run();
+            useUIStore.getState().toggleColorPicker();
           },
         },
         {
