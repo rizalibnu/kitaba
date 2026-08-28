@@ -26,6 +26,11 @@ import {
   ChevronRight,
   BookmarkPlus,
   Image,
+  ZoomIn,
+  ZoomOut,
+  RotateCcw,
+  PanelLeft,
+  Eye,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useUIStore } from '@/stores/uiStore';
@@ -65,6 +70,10 @@ export function MenuBar() {
   const setFontSize = useEditorStore((s) => s.setFontSize);
   const autoReplace = useEditorStore((s) => s.autoReplace);
   const toggleAutoReplace = useEditorStore((s) => s.toggleAutoReplace);
+  const zoom = useEditorStore((s) => s.zoom);
+  const zoomIn = useEditorStore((s) => s.zoomIn);
+  const zoomOut = useEditorStore((s) => s.zoomOut);
+  const resetZoom = useEditorStore((s) => s.resetZoom);
 
   const keyboardMode = useKeyboardStore((s) => s.keyboardMode);
   const setKeyboardMode = useKeyboardStore((s) => s.setKeyboardMode);
@@ -72,6 +81,12 @@ export function MenuBar() {
   const setActiveDialog = useUIStore((s) => s.setActiveDialog);
   const toggleSpecialCharacters = useUIStore((s) => s.toggleSpecialCharacters);
   const specialCharactersOpen = useUIStore((s) => s.specialCharactersOpen);
+  const sidebarOpen = useUIStore((s) => s.sidebarOpen);
+  const toggleSidebar = useUIStore((s) => s.toggleSidebar);
+  const virtualKeyboardOpen = useUIStore((s) => s.virtualKeyboardOpen);
+  const toggleVirtualKeyboard = useUIStore((s) => s.toggleVirtualKeyboard);
+  const statusBarVisible = useUIStore((s) => s.statusBarVisible);
+  const toggleStatusBar = useUIStore((s) => s.toggleStatusBar);
 
   const [activeMenu, setActiveMenu] = useState<string | null>(null);
   const [activeSubmenu, setActiveSubmenu] = useState<string | null>(null);
@@ -251,6 +266,57 @@ export function MenuBar() {
           label: 'Save as Image..',
           icon: Image,
           action: () => setActiveDialog('export'),
+        },
+      ],
+    },
+    {
+      id: 'view',
+      label: 'View',
+      items: [
+        {
+          id: 'zoomIn',
+          label: 'Zoom In',
+          icon: ZoomIn,
+          shortcut: 'Ctrl++',
+          disabled: zoom >= 300,
+          action: () => zoomIn(10),
+        },
+        {
+          id: 'zoomOut',
+          label: 'Zoom Out',
+          icon: ZoomOut,
+          shortcut: 'Ctrl+-',
+          disabled: zoom <= 30,
+          action: () => zoomOut(10),
+        },
+        {
+          id: 'resetZoom',
+          label: `Reset Zoom (100%) [Now: ${zoom}%]`,
+          icon: RotateCcw,
+          shortcut: 'Ctrl+0',
+          action: () => resetZoom(),
+        },
+        { id: 'sep-view-1', label: '', separator: true },
+        {
+          id: 'toggleSidebar',
+          label: 'Dokumen / Bilah Sisi',
+          icon: PanelLeft,
+          checked: sidebarOpen,
+          action: () => toggleSidebar(),
+        },
+        {
+          id: 'toggleVirtualKb',
+          label: 'Papan Ketik Virtual',
+          icon: Keyboard,
+          checked: virtualKeyboardOpen,
+          action: () => toggleVirtualKeyboard(),
+        },
+        {
+          id: 'toggleStatusBar',
+          label: 'Bilah Status (Status Bar)',
+          icon: Eye,
+          checked: statusBarVisible,
+          action: () => toggleStatusBar(),
         },
       ],
     },

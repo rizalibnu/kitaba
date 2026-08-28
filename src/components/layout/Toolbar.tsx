@@ -19,6 +19,8 @@ import {
   BookmarkPlus,
   Keyboard,
   Sparkles,
+  ZoomIn,
+  ZoomOut,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useUIStore } from '@/stores/uiStore';
@@ -26,6 +28,8 @@ import { useDocumentStore } from '@/stores/documentStore';
 import { useEditorStore } from '@/stores/editorStore';
 import { useNaskhEditor } from '@/editor/EditorContext';
 import { ARABIC_FONTS, LATIN_FONTS, FONT_SIZES } from '@/types';
+
+const ZOOM_PRESETS = [50, 75, 90, 100, 125, 150, 175, 200, 250, 300];
 
 export function Toolbar() {
   const editor = useNaskhEditor();
@@ -40,6 +44,11 @@ export function Toolbar() {
   const setFontSize = useEditorStore((s) => s.setFontSize);
   const fontScript = useEditorStore((s) => s.fontScript);
   const toggleFontScript = useEditorStore((s) => s.toggleFontScript);
+  const zoom = useEditorStore((s) => s.zoom);
+  const zoomIn = useEditorStore((s) => s.zoomIn);
+  const zoomOut = useEditorStore((s) => s.zoomOut);
+  const setZoom = useEditorStore((s) => s.setZoom);
+  const resetZoom = useEditorStore((s) => s.resetZoom);
 
   const setActiveDialog = useUIStore((s) => s.setActiveDialog);
   const toggleSpecialCharacters = useUIStore((s) => s.toggleSpecialCharacters);
@@ -226,7 +235,51 @@ export function Toolbar() {
 
       <ToolbarSeparator />
 
-      {/* Group 9: Special Characters (Dock Toggle) */}
+      {/* Group 9: Zoom Controls */}
+      <div className="flex items-center gap-1">
+        <ToolbarIconButton
+          icon={ZoomOut}
+          label="Zoom Out (Ctrl+-)"
+          disabled={zoom <= 30}
+          onClick={() => zoomOut(10)}
+        />
+        <select
+          value={zoom}
+          onChange={(e) => setZoom(Number(e.target.value))}
+          title="Pilih Zoom Level"
+          className="h-8.5 px-2 text-xs font-semibold bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-hidden focus:border-amber-500 cursor-pointer shadow-xs text-center"
+          style={{ width: '68px' }}
+        >
+          {ZOOM_PRESETS.map((pct) => (
+            <option key={pct} value={pct}>
+              {pct}%
+            </option>
+          ))}
+          {!ZOOM_PRESETS.includes(zoom) && (
+            <option value={zoom}>{zoom}%</option>
+          )}
+        </select>
+        <ToolbarIconButton
+          icon={ZoomIn}
+          label="Zoom In (Ctrl++)"
+          disabled={zoom >= 300}
+          onClick={() => zoomIn(10)}
+        />
+        {zoom !== 100 && (
+          <button
+            type="button"
+            onClick={resetZoom}
+            title="Reset Zoom ke 100% (Ctrl+0)"
+            className="h-8.5 px-2 text-[11px] font-bold text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-950/70 border border-amber-300 dark:border-amber-700 rounded-md hover:bg-amber-100 transition-colors cursor-pointer"
+          >
+            100%
+          </button>
+        )}
+      </div>
+
+      <ToolbarSeparator />
+
+      {/* Group 10: Special Characters (Dock Toggle) */}
       <ToolbarIconButton
         icon={Sparkles}
         label="Special Characters Panel (Ctrl+K)"
@@ -234,14 +287,14 @@ export function Toolbar() {
         onClick={toggleSpecialCharacters}
       />
 
-      {/* Group 10: FastWord Edit Icon */}
+      {/* Group 11: FastWord Edit Icon */}
       <ToolbarIconButton
         icon={BookmarkPlus}
         label="Save/Manage FastWord (Alt+W)"
         onClick={() => setActiveDialog('fastWord')}
       />
 
-      {/* Group 11: Virtual Keyboard Toggle */}
+      {/* Group 12: Virtual Keyboard Toggle */}
       <ToolbarIconButton
         icon={Keyboard}
         label="Toggle Virtual Keyboard"
@@ -249,10 +302,10 @@ export function Toolbar() {
         onClick={toggleVirtualKeyboard}
       />
 
-      {/* Group 12: Help / Shortcuts (?) */}
+      {/* Group 13: Help / Shortcuts (?) */}
       <ToolbarIconButton
         icon={HelpCircle}
-        label="Petunjuk & Shortcut Naskh"
+        label="Petunjuk & Shortcut Kitaba"
         onClick={() => setActiveDialog('shortcuts')}
       />
     </div>

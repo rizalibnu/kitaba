@@ -52,8 +52,8 @@ export const DEFAULT_EDITOR_CONFIG = {
   fontScript: 'arabic' as FontScript,
 };
 
-const MIN_ZOOM = 50;
-const MAX_ZOOM = 200;
+const MIN_ZOOM = 30;
+const MAX_ZOOM = 300;
 const DEFAULT_ZOOM_STEP = 10;
 
 function clampZoom(value: number): number {

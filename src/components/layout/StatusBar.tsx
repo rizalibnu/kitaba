@@ -59,6 +59,10 @@ export function StatusBar() {
 
   const fontScript = useEditorStore((s) => s.fontScript);
   const toggleFontScript = useEditorStore((s) => s.toggleFontScript);
+  const zoom = useEditorStore((s) => s.zoom);
+  const zoomIn = useEditorStore((s) => s.zoomIn);
+  const zoomOut = useEditorStore((s) => s.zoomOut);
+  const resetZoom = useEditorStore((s) => s.resetZoom);
 
   return (
     <div className="flex items-center justify-between h-6 px-6 sm:px-8 bg-[#EDEAE0] dark:bg-gray-900 border-t border-gray-300 dark:border-gray-700 text-[11px] font-sans text-gray-700 dark:text-gray-300 select-none z-30 shadow-inner">
@@ -113,8 +117,34 @@ export function StatusBar() {
         </button>
       </div>
 
-      {/* Right: CAPS lock indicator */}
+      {/* Right: Zoom controls & CAPS lock indicator */}
       <div className="flex items-center gap-3">
+        <div className="flex items-center gap-1 bg-[#DCD8C8] dark:bg-gray-800 px-1.5 py-0.5 rounded border border-gray-300 dark:border-gray-700">
+          <button
+            onClick={() => zoomOut(10)}
+            title="Zoom Out"
+            disabled={zoom <= 30}
+            className="px-1 text-[11px] font-bold hover:text-amber-600 disabled:opacity-40"
+          >
+            -
+          </button>
+          <button
+            onClick={resetZoom}
+            title="Klik untuk Reset Zoom ke 100%"
+            className="font-mono font-semibold text-[10px] px-1 hover:underline cursor-pointer"
+          >
+            {zoom}%
+          </button>
+          <button
+            onClick={() => zoomIn(10)}
+            title="Zoom In"
+            disabled={zoom >= 300}
+            className="px-1 text-[11px] font-bold hover:text-amber-600 disabled:opacity-40"
+          >
+            +
+          </button>
+        </div>
+
         <div
           className={cn(
             'px-2 py-0.5 rounded-xs font-mono font-bold text-[10px] border tracking-wider',
