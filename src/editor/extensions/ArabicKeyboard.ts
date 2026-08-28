@@ -10,6 +10,7 @@ import { useSettingsStore } from '@/stores/settingsStore';
 import { useUIStore } from '@/stores/uiStore';
 import { useEditorStore } from '@/stores/editorStore';
 import { useDocumentStore } from '@/stores/documentStore';
+import { SPECIAL_CHARACTER_GROUPS } from '@/types';
 
 export const ArabicKeyboard = Extension.create({
   name: 'arabicKeyboard',
@@ -227,6 +228,24 @@ export const ArabicKeyboard = Extension.create({
               useUIStore.getState().setSpecialCharactersOpen(true);
               useUIStore.getState().setSpecialCharactersGroup(grpNum);
               return true;
+            }
+
+            // 4. Alt + [A-K]: Insert Special Character from current active group
+            if (isAltKey && !isKeyW && !event.ctrlKey && !event.metaKey) {
+              const charKeyMatch = event.code.match(/^Key([A-Ka-k])$/i) || event.key.match(/^[a-kA-K]$/i);
+              if (charKeyMatch) {
+                const letter = (charKeyMatch[1] || event.key).toUpperCase();
+                const activeGroupNum = useUIStore.getState().specialCharactersGroup || 1;
+                const group = SPECIAL_CHARACTER_GROUPS.find((g) => g.id === activeGroupNum) || SPECIAL_CHARACTER_GROUPS[0];
+                const item = group.items.find((it) => it.keyLetter.toUpperCase() === letter);
+                if (item) {
+                  event.preventDefault();
+                  flushCombo();
+                  const insertChar = event.shiftKey ? item.charBottom : item.charTop;
+                  commitText(insertChar);
+                  return true;
+                }
+              }
             }
 
             // 4. Function Keys (F1 - F12)

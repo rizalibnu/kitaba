@@ -18,6 +18,7 @@ import { setActiveEditor } from './EditorContext';
 
 import { useDocumentStore } from '@/stores/documentStore';
 import { useEditorStore } from '@/stores/editorStore';
+import { useUIStore } from '@/stores/uiStore';
 import { AVAILABLE_FONTS } from '@/types';
 import { processImportedContent } from '@/lib/khtImportHelper';
 
@@ -153,6 +154,24 @@ export function NaskhEditor() {
           if (activeDoc) {
             useDocumentStore.getState().markDocumentSaved(activeDoc.id);
           }
+        }
+
+        // Special Characters Panel Toggle (Ctrl+K)
+        else if (keyLower === 'k') {
+          e.preventDefault();
+          useUIStore.getState().toggleSpecialCharacters();
+        }
+      }
+
+      // Alt/Option + 1..5: Open Special Characters group
+      const isAltKey = e.altKey || e.getModifierState?.('Alt');
+      if (isAltKey && !e.ctrlKey && !e.metaKey) {
+        if (/^[1-5]$/.test(e.key) || /^Digit[1-5]$/.test(e.code)) {
+          e.preventDefault();
+          const digitMatch = e.key.match(/^[1-5]$/) || e.code.match(/Digit([1-5])/);
+          const grpNum = digitMatch ? parseInt(digitMatch[1] || digitMatch[0], 10) : 1;
+          useUIStore.getState().setSpecialCharactersOpen(true);
+          useUIStore.getState().setSpecialCharactersGroup(grpNum);
         }
       }
     };
