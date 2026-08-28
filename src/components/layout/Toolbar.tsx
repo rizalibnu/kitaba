@@ -21,6 +21,7 @@ import {
   Sparkles,
   ZoomIn,
   ZoomOut,
+  Upload,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useUIStore } from '@/stores/uiStore';
@@ -28,6 +29,7 @@ import { useDocumentStore } from '@/stores/documentStore';
 import { useEditorStore } from '@/stores/editorStore';
 import { useNaskhEditor } from '@/editor/EditorContext';
 import { ARABIC_FONTS, LATIN_FONTS, FONT_SIZES } from '@/types';
+import { triggerKhtImport } from '@/lib/khtImportHelper';
 
 const ZOOM_PRESETS = [50, 75, 90, 100, 125, 150, 175, 200, 250, 300];
 
@@ -66,17 +68,22 @@ export function Toolbar() {
   };
 
   return (
-    <div className="flex items-center gap-2 px-6 sm:px-8 py-2 bg-[#EDEAE0] dark:bg-gray-900 border-b border-gray-300 dark:border-gray-700 select-none overflow-x-auto shadow-xs">
-      {/* Group 1: File Actions (New, Open, Save, Print) */}
+    <div className="flex items-center gap-2 pl-2 sm:pl-2.5 pr-4 sm:pr-6 py-2 bg-[#EDEAE0] dark:bg-gray-900 border-b border-gray-300 dark:border-gray-700 select-none overflow-x-auto shadow-xs">
+      {/* Group 1: File Actions (New, Open, Import, Save, Print) */}
       <div className="flex items-center gap-1">
         <ToolbarIconButton
           icon={FilePlus}
-          label="New (Ctrl+N)"
+          label="New Document (Ctrl+N)"
           onClick={() => createDocument()}
         />
         <ToolbarIconButton
+          icon={Upload}
+          label="Import Dokumen (.kht, .rtf, .txt, .html)"
+          onClick={() => triggerKhtImport(editor)}
+        />
+        <ToolbarIconButton
           icon={FolderOpen}
-          label="Open (Ctrl+O)"
+          label="Daftar Dokumen (Ctrl+O)"
           onClick={() => useUIStore.getState().setSidebarOpen(true)}
         />
         <ToolbarIconButton

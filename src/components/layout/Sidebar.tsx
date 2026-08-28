@@ -11,10 +11,13 @@ import {
   Trash2,
   Clock,
   PanelLeftClose,
+  Upload,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useUIStore } from '@/stores/uiStore';
 import { useDocumentStore, type Document } from '@/stores/documentStore';
+import { useNaskhEditor } from '@/editor/EditorContext';
+import { triggerKhtImport } from '@/lib/khtImportHelper';
 
 interface ItemContextMenu {
   x: number;
@@ -24,6 +27,7 @@ interface ItemContextMenu {
 
 export function Sidebar() {
   const { t } = useTranslation();
+  const editor = useNaskhEditor();
 
   // Stores
   const sidebarOpen = useUIStore((s) => s.sidebarOpen);
@@ -381,15 +385,24 @@ export function Sidebar() {
         </div>
       )}
 
-      {/* Bottom Footer: + New Document Button */}
-      <div className="p-2 border-t border-gray-200 dark:border-gray-800">
+      {/* Bottom Footer: + New Document & Import Buttons */}
+      <div className="p-2 border-t border-gray-200 dark:border-gray-800 flex flex-col gap-1.5">
         <button
           type="button"
           onClick={() => createDocument()}
-          className="w-full flex items-center justify-center gap-2 h-8 px-3 text-xs font-medium text-white bg-primary-600 hover:bg-primary-700 dark:bg-primary-600 dark:hover:bg-primary-500 rounded-md transition-colors shadow-xs cursor-pointer focus:outline-hidden"
+          className="w-full flex items-center justify-center gap-2 h-8 px-3 text-xs font-medium text-white bg-amber-600 hover:bg-amber-700 dark:bg-amber-600 dark:hover:bg-amber-500 rounded-md transition-colors shadow-xs cursor-pointer focus:outline-hidden"
         >
           <Plus size={15} />
-          <span>{t('sidebar.newDocument')}</span>
+          <span>{t('sidebar.newDocument', 'Dokumen Baru')}</span>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => triggerKhtImport(editor)}
+          className="w-full flex items-center justify-center gap-2 h-8 px-3 text-xs font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800 hover:bg-amber-50 dark:hover:bg-gray-700 border border-gray-300 dark:border-gray-700 rounded-md transition-colors shadow-xs cursor-pointer focus:outline-hidden"
+        >
+          <Upload size={14} className="text-amber-600 dark:text-amber-400" />
+          <span>{t('sidebar.importDocument', 'Import File (.kht, .rtf)')}</span>
         </button>
       </div>
     </aside>

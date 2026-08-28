@@ -73,43 +73,47 @@ export const ArabicKeyboard = Extension.create({
               }
             };
 
-            const { fontScript } = useEditorStore.getState();
+            const upperKey = event.key ? event.key.toUpperCase() : '';
+            const isAltKey = event.altKey || event.getModifierState?.('Alt');
+            const isKeyW = event.code === 'KeyW' || event.key === 'w' || event.key === 'W' || event.key === '∑';
 
-            // When in Latin font mode, let standard keyboard input pass through natively (A-Z Latin typing)
-            if (fontScript === 'latin') {
-              flushCombo();
-              return false;
-            }
-
-            const upperKey = event.key.toUpperCase();
-
-            // 1. Handle FastWord pending input (Alt+W then Letter)
-            if (isFastWordPending && !event.ctrlKey && !event.metaKey && !event.altKey) {
-              if (/^[a-zA-Z]$/.test(event.key)) {
+            // 1. Handle FastWord pending input (Alt+W then Letter A-Z)
+            if (isFastWordPending && !event.ctrlKey && !event.metaKey) {
+              const letterMatch = event.code.match(/^Key([A-Za-z])$/i) || event.key.match(/^[a-zA-Z]$/);
+              if (letterMatch) {
                 event.preventDefault();
                 isFastWordPending = false;
-                const entry = useSettingsStore.getState().getFastWord(event.key);
-                if (entry) {
+                const letter = (letterMatch[1] || event.key).toUpperCase();
+                const entry = useSettingsStore.getState().getFastWord(letter);
+                if (entry && entry.text) {
                   commitText(entry.text);
                 }
                 return true;
               }
-              isFastWordPending = false;
+              // If another key is pressed, cancel pending fast word
+              if (event.key !== 'Alt' && event.key !== 'Shift') {
+                isFastWordPending = false;
+              }
             }
 
-            // 2. Alt + W: Trigger FastWord waiting mode
-            if (event.altKey && (event.key === 'w' || event.key === 'W')) {
+            // 2. Alt + W (or Option + W on Mac / Linux): Trigger FastWord waiting mode
+            if (isAltKey && isKeyW) {
               event.preventDefault();
               flushCombo();
               isFastWordPending = true;
+              // Reset pending after 4 seconds if no key is pressed
+              setTimeout(() => {
+                isFastWordPending = false;
+              }, 4000);
               return true;
             }
 
             // 3. Alt + 1..5: Open Special Characters group tab
-            if (event.altKey && /^[1-5]$/.test(event.key)) {
+            if (isAltKey && (/^[1-5]$/.test(event.key) || /^Digit[1-5]$/.test(event.code))) {
               event.preventDefault();
               flushCombo();
-              const grpNum = parseInt(event.key, 10);
+              const digitMatch = event.key.match(/^[1-5]$/) || event.code.match(/Digit([1-5])/);
+              const grpNum = digitMatch ? parseInt(digitMatch[1] || digitMatch[0], 10) : 1;
               useUIStore.getState().setSpecialCharactersOpen(true);
               useUIStore.getState().setSpecialCharactersGroup(grpNum);
               return true;
@@ -159,24 +163,51 @@ export const ArabicKeyboard = Extension.create({
                   return true;
                 }
 
-                // Shift + F7: Sukun (ـْ)
+                // Shift + F7: Tanda Tashil (ء)
                 if (upperKey === 'F7' && event.shiftKey) {
                   event.preventDefault();
                   flushCombo();
-                  commitHarakat('\u0652');
+                  commitText('\u0621');
                   return true;
                 }
 
-                // Regular Harakat F1 - F11
+                // Shift + F8: Tanda Imalah
+                if (upperKey === 'F8' && event.shiftKey) {
+                  event.preventDefault();
+                  flushCombo();
+                  commitHarakat('\u06EC');
+                  return true;
+                }
+
+                // Shift + F9: Tanda Isymam
+                if (upperKey === 'F9' && event.shiftKey) {
+                  event.preventDefault();
+                  flushCombo();
+                  commitHarakat('\u06ED');
+                  return true;
+                }
+
+                // Standard F1-F11 Harakat
                 const harakat = getHarakat(upperKey);
                 if (harakat) {
                   event.preventDefault();
                   flushCombo();
-                  const text = Array.isArray(harakat) ? harakat.join('') : harakat;
-                  commitHarakat(text);
+                  if (Array.isArray(harakat)) {
+                    commitHarakat(harakat.join(''));
+                  } else {
+                    commitHarakat(harakat);
+                  }
                   return true;
                 }
               }
+            }
+
+            const { fontScript } = useEditorStore.getState();
+
+            // When in Latin font mode, let standard keyboard input pass through natively (A-Z Latin typing)
+            if (fontScript === 'latin') {
+              flushCombo();
+              return false;
             }
 
             // 5. Special Quranic Diacritics shortcuts:

@@ -108,12 +108,12 @@ export function TabBar() {
     <div
       role="tablist"
       aria-label="Document Tabs"
-      className="h-9 bg-gray-100 dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 flex items-center px-6 sm:px-8 gap-1 select-none relative z-20"
+      className="h-10 bg-[#E6E2D4] dark:bg-gray-900/90 border-b border-gray-300 dark:border-gray-800 flex items-center pl-4 sm:pl-5 pr-4 sm:pr-6 gap-2 select-none relative z-20"
     >
       {/* Scrollable Tabs Wrapper */}
       <div
         ref={tabContainerRef}
-        className="flex items-center gap-1 overflow-x-auto scrollbar-none h-full py-0.5 flex-1"
+        className="flex items-center gap-1.5 overflow-x-auto scrollbar-none h-full py-1 flex-1 pl-1"
       >
         {documents.map((doc) => {
           const isActive = doc.id === activeDocumentId;
@@ -133,10 +133,10 @@ export function TabBar() {
               onDoubleClick={() => handleStartRename(doc)}
               onContextMenu={(e) => handleTabContextMenu(e, doc.id)}
               className={cn(
-                'group relative flex items-center gap-1.5 h-7 px-3 text-xs rounded-t-md transition-all cursor-pointer border-t border-s border-e shrink-0 max-w-[200px]',
+                'group relative flex items-center gap-2 h-8 px-4 text-xs rounded-t-lg transition-all cursor-pointer border-t border-s border-e shrink-0 max-w-[220px]',
                 isActive
-                  ? 'bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 border-gray-200 dark:border-gray-700 shadow-xs font-medium border-b-2 border-b-primary-600 dark:border-b-primary-400'
-                  : 'bg-gray-200/50 dark:bg-gray-800/40 text-gray-600 dark:text-gray-400 border-transparent hover:bg-gray-200 dark:hover:bg-gray-800/70 hover:text-gray-900 dark:hover:text-gray-200'
+                  ? 'bg-[#F3F1E7] dark:bg-[#252533] text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-700 shadow-xs font-semibold border-b-2 border-b-amber-600 dark:border-b-amber-400'
+                  : 'bg-[#DCD8C8]/60 dark:bg-gray-800/40 text-gray-600 dark:text-gray-400 border-transparent hover:bg-[#DCD8C8] dark:hover:bg-gray-800/70 hover:text-gray-900 dark:hover:text-gray-200'
               )}
             >
               {/* Document Icon */}

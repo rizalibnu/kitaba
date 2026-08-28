@@ -93,10 +93,10 @@ export function AboutDialog({ open, onClose }: AboutDialogProps) {
     },
     {
       icon: Download,
-      title: 'Multi-Format Export',
+      title: 'Multi-Format Export & Import',
       desc: t(
         'about.features.export',
-        'Export documents to PDF, standalone HTML, PNG/JPG images, RTF, and plain text.'
+        'Export to PDF, HTML, PNG/JPG, RTF, Plain Text & Import legacy .kht documents.'
       ),
     },
     {
@@ -104,7 +104,7 @@ export function AboutDialog({ open, onClose }: AboutDialogProps) {
       title: 'Offline-First & Private',
       desc: t(
         'about.features.pwa',
-        'PWA technology with local IndexedDB storage. No server required, your text stays on your device.'
+        'IndexedDB local storage. Your documents remain private on your device.'
       ),
     },
   ];
@@ -113,16 +113,16 @@ export function AboutDialog({ open, onClose }: AboutDialogProps) {
     <Dialog
       open={isOpen}
       onClose={handleClose}
-      title={t('about.title', 'About Kitaba')}
+      title={t('about.title', 'Tentang Kitaba')}
       size="lg"
     >
-      <div className="space-y-5">
+      <div className="space-y-6 p-1">
         {/* App Hero / Branding banner */}
-        <div className="flex flex-col items-center justify-center text-center p-5 rounded-2xl bg-gradient-to-br from-emerald-600 via-emerald-700 to-emerald-900 text-white shadow-sm relative overflow-hidden">
-          <div className="absolute -right-8 -top-8 text-8xl font-arabic text-white/10 select-none pointer-events-none">
+        <div className="flex flex-col items-center justify-center text-center p-6 rounded-2xl bg-gradient-to-br from-emerald-700 via-emerald-800 to-emerald-950 text-white shadow-md relative overflow-hidden">
+          <div className="absolute -right-6 -top-6 text-9xl font-arabic text-white/5 select-none pointer-events-none">
             كتابة
           </div>
-          <div className="w-14 h-14 rounded-2xl bg-white/10 backdrop-blur-xs flex items-center justify-center mb-3 shadow-inner border border-white/20">
+          <div className="w-16 h-16 rounded-2xl bg-white/10 backdrop-blur-sm flex items-center justify-center mb-3.5 shadow-inner border border-white/20">
             <span className="text-3xl font-arabic font-bold text-amber-300">
               ك
             </span>
@@ -130,45 +130,43 @@ export function AboutDialog({ open, onClose }: AboutDialogProps) {
           <h1 className="text-2xl font-bold tracking-tight">
             Kitaba <span className="font-arabic font-normal text-amber-200">(كتابة)</span>
           </h1>
-          <p className="text-xs text-emerald-100 mt-1 max-w-sm">
-            {t('about.subtitle', 'Modern Arabic & Latin Text Editor')}
+          <p className="text-xs text-emerald-100/90 mt-1.5 max-w-sm leading-relaxed">
+            {t('about.subtitle', 'Editor Teks Arab & Latin Modern')}
           </p>
-          <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 mt-3 rounded-full bg-white/15 text-[11px] font-mono text-emerald-100">
-            <span>{t('about.version', 'Version')} 1.0.0</span>
-            <span className="opacity-60">•</span>
-            <span>PWA Ready</span>
+          <div className="inline-flex items-center gap-2 px-3 py-1 mt-4 rounded-full bg-black/25 backdrop-blur-xs text-xs font-mono font-medium text-amber-200 border border-white/10">
+            <span>v0.1.0-beta</span>
           </div>
         </div>
 
         {/* Description */}
-        <p className="text-xs leading-relaxed text-gray-600 dark:text-gray-300 text-center px-2">
+        <p className="text-xs leading-relaxed text-gray-600 dark:text-gray-300 text-center px-4">
           {t(
             'about.description',
-            'Kitaba is a modern Arabic and Latin text editor, engineered with React 19, TypeScript, Tiptap, and Tailwind CSS.'
+            'Kitaba adalah aplikasi web modern offline-first yang dirancang khusus untuk menulis, menata gaya, dan memformat teks Arab serta teks Latin dengan teknologi web masa kini.'
           )}
         </p>
 
         {/* Feature Highlights */}
-        <div>
-          <h3 className="text-xs font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500 mb-2.5">
-            {t('about.featuresTitle', 'Key Features')}
+        <div className="space-y-3">
+          <h3 className="text-[11px] font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500 px-1">
+            {t('about.featuresTitle', 'Fitur Utama')}
           </h3>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {featureItems.map((item, idx) => {
               const Icon = item.icon;
               return (
                 <div
                   key={idx}
-                  className="flex items-start gap-2.5 p-3 rounded-xl border border-gray-100 dark:border-gray-700/60 bg-gray-50/50 dark:bg-gray-800/40"
+                  className="flex items-start gap-3 p-3.5 rounded-xl border border-gray-200/80 dark:border-gray-700/60 bg-gray-50/70 dark:bg-gray-800/40 hover:border-amber-400/50 transition-colors"
                 >
-                  <div className="p-1.5 rounded-lg bg-emerald-100/80 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 mt-0.5 shrink-0">
-                    <Icon size={14} />
+                  <div className="p-2 rounded-lg bg-emerald-100/80 dark:bg-emerald-950/70 text-emerald-700 dark:text-emerald-300 mt-0.5 shrink-0 shadow-2xs">
+                    <Icon size={16} />
                   </div>
-                  <div>
-                    <div className="text-xs font-semibold text-gray-800 dark:text-gray-200">
+                  <div className="space-y-0.5">
+                    <div className="text-xs font-semibold text-gray-900 dark:text-gray-100">
                       {item.title}
                     </div>
-                    <p className="text-[11px] text-gray-500 dark:text-gray-400 mt-0.5 leading-snug">
+                    <p className="text-[11px] text-gray-500 dark:text-gray-400 leading-relaxed">
                       {item.desc}
                     </p>
                   </div>
@@ -179,49 +177,49 @@ export function AboutDialog({ open, onClose }: AboutDialogProps) {
         </div>
 
         {/* Technical stack & License */}
-        <div className="p-3.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-gray-600 dark:text-gray-300">
+        <div className="p-4 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50/80 dark:bg-gray-800/50 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-gray-600 dark:text-gray-300">
           <div className="flex items-center gap-2">
             <span className="inline-block w-2 h-2 rounded-full bg-emerald-500"></span>
-            <span>{t('about.license', 'Open Source - MIT License')}</span>
+            <span>{t('about.license', 'Lisensi: Sumber Terbuka (MIT)')}</span>
           </div>
 
           <div className="flex items-center gap-3">
             <a
-              href="https://github.com"
+              href="https://github.com/rizalibnu/kitaba"
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-1 text-emerald-600 dark:text-emerald-400 hover:underline font-medium"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 text-gray-800 dark:text-gray-200 hover:text-emerald-600 dark:hover:text-emerald-400 font-medium transition-colors shadow-2xs"
             >
               <Code2 size={14} />
-              <span>Source Code</span>
-              <ExternalLink size={10} />
+              <span>Source Code GitHub</span>
+              <ExternalLink size={11} className="opacity-60" />
             </a>
           </div>
         </div>
 
-        {/* PWA Update Checker */}
+        {/* Update Checker */}
         <div className="flex flex-col items-center gap-2 pt-2 border-t border-gray-100 dark:border-gray-700/60">
           <button
             onClick={handleCheckUpdate}
             disabled={checkingUpdate}
-            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-amber-900 dark:text-amber-200 bg-amber-100/70 dark:bg-amber-950/60 hover:bg-amber-200 dark:hover:bg-amber-900/80 border border-amber-300 dark:border-amber-700 rounded-lg transition-colors cursor-pointer disabled:opacity-50"
+            className="flex items-center gap-2 px-4 py-2 text-xs font-semibold text-amber-900 dark:text-amber-200 bg-amber-100/80 dark:bg-amber-950/60 hover:bg-amber-200/90 dark:hover:bg-amber-900/80 border border-amber-300 dark:border-amber-700/70 rounded-xl transition-all cursor-pointer shadow-2xs disabled:opacity-50"
           >
             <RefreshCw size={13} className={checkingUpdate ? 'animate-spin' : ''} />
             <span>{checkingUpdate ? 'Memeriksa Pembaruan...' : 'Periksa Pembaruan Kitaba'}</span>
           </button>
           {updateStatus && (
-            <div className="flex items-center gap-1.5 text-[11px] font-medium text-emerald-600 dark:text-emerald-400 text-center animate-in fade-in">
-              <CheckCircle size={13} />
+            <div className="flex items-center gap-1.5 text-xs font-medium text-emerald-600 dark:text-emerald-400 text-center animate-in fade-in py-1">
+              <CheckCircle size={14} />
               <span>{updateStatus}</span>
             </div>
           )}
         </div>
 
         {/* Footer credits */}
-        <div className="flex items-center justify-center gap-1 text-[11px] text-gray-400 dark:text-gray-500">
-          <span>Crafted with</span>
-          <Heart size={12} className="text-rose-500 fill-rose-500 inline" />
-          <span>for Arabic Typography</span>
+        <div className="flex items-center justify-center gap-1.5 text-xs text-gray-400 dark:text-gray-500 pt-1">
+          <span>Dibuat dengan</span>
+          <Heart size={13} className="text-rose-500 fill-rose-500 inline" />
+          <span>untuk Tipografi Arab & Latin</span>
         </div>
       </div>
     </Dialog>

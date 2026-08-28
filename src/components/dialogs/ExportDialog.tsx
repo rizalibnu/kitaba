@@ -224,6 +224,17 @@ export function ExportDialog({ open, onClose }: ExportDialogProps) {
           </div>
         )}
 
+        {/* Native folder selection tip */}
+        <div className="p-2.5 text-[11px] text-amber-800 dark:text-amber-200 bg-amber-50 dark:bg-amber-950/40 rounded-lg border border-amber-200 dark:border-amber-800/50 flex items-center gap-2">
+          <span>📁</span>
+          <span>
+            {t(
+              'export.folderPickerHint',
+              'Saat Anda klik Export, jendela Finder / File Explorer akan terbuka untuk memilih folder penyimpanan di perangkat Anda.'
+            )}
+          </span>
+        </div>
+
         {/* Buttons */}
         <div className="flex justify-end gap-2 pt-3 border-t border-gray-100 dark:border-gray-700">
           <button

@@ -31,6 +31,7 @@ import {
   RotateCcw,
   PanelLeft,
   Eye,
+  Upload,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useUIStore } from '@/stores/uiStore';
@@ -39,6 +40,7 @@ import { useEditorStore } from '@/stores/editorStore';
 import { useKeyboardStore } from '@/stores/keyboardStore';
 import { useNaskhEditor } from '@/editor/EditorContext';
 import { exportImage } from '@/lib/export';
+import { triggerKhtImport } from '@/lib/khtImportHelper';
 
 interface MenuItem {
   id: string;
@@ -137,8 +139,15 @@ export function MenuBar() {
           action: () => createDocument(),
         },
         {
+          id: 'import',
+          label: 'Import File (.kht, .rtf, .txt)...',
+          icon: Upload,
+          shortcut: 'Ctrl+I',
+          action: () => triggerKhtImport(editor),
+        },
+        {
           id: 'open',
-          label: 'Open',
+          label: 'Open Document List',
           icon: FolderOpen,
           shortcut: 'Ctrl+O',
           action: () => useUIStore.getState().setSidebarOpen(true),
@@ -494,7 +503,7 @@ export function MenuBar() {
   return (
     <div
       ref={menuBarRef}
-      className="flex items-center h-9 px-6 sm:px-8 bg-[#EDEAE0] dark:bg-gray-900 border-b border-gray-300 dark:border-gray-700 text-[13.5px] select-none z-30 font-sans shadow-xs gap-1"
+      className="flex items-center h-9 pl-4 sm:pl-5 pr-4 sm:pr-6 bg-[#EDEAE0] dark:bg-gray-900 border-b border-gray-300 dark:border-gray-700 text-[13.5px] select-none z-30 font-sans shadow-xs gap-1.5"
     >
       {menuCategories.map((cat) => {
         const isOpen = activeMenu === cat.id;

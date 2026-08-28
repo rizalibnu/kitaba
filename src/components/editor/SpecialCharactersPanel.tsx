@@ -22,66 +22,66 @@ export function SpecialCharactersPanel() {
   };
 
   return (
-    <div className="border-t-2 border-amber-500/40 bg-[#EDEBD7] dark:bg-gray-800 text-gray-900 dark:text-gray-100 shadow-xl z-20 transition-all select-none">
+    <div className="border-t-2 border-amber-500/50 bg-[#EDEAE0] dark:bg-gray-900 text-gray-900 dark:text-gray-100 shadow-2xl z-20 transition-all select-none">
       {/* Header Bar */}
-      <div className="flex items-center justify-between px-3 py-1 bg-[#DEDCC6] dark:bg-gray-900 border-b border-gray-300 dark:border-gray-700 text-xs">
-        <div className="flex items-center gap-2">
-          <Sparkles size={14} className="text-amber-700 dark:text-amber-400" />
-          <span className="font-semibold tracking-wide text-gray-800 dark:text-gray-200">
-            Special Characters (Karakter Spesial)
+      <div className="flex items-center justify-between px-4 sm:px-8 py-2.5 bg-[#DED9CA] dark:bg-gray-950 border-b border-gray-300 dark:border-gray-800 text-xs">
+        <div className="flex items-center gap-3">
+          <Sparkles size={16} className="text-amber-700 dark:text-amber-400" />
+          <span className="font-bold tracking-wide text-gray-900 dark:text-gray-100 text-xs sm:text-sm">
+            Karakter Spesial & Simbol Kaligrafi
           </span>
-          <span className="text-[10px] text-gray-500 dark:text-gray-400">
-            [Shortcut: Alt+1..5 / Alt+(Group, Key)]
+          <span className="hidden sm:inline text-[11px] text-gray-600 dark:text-gray-400 font-mono bg-black/5 dark:bg-white/5 px-2 py-0.5 rounded">
+            Shortcut: Alt+1..5 / Option+1..5
           </span>
         </div>
 
         {/* Tab Groups 1 - 5 */}
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-2">
           {SPECIAL_CHARACTER_GROUPS.map((grp) => (
             <button
               key={grp.id}
               onClick={() => setSpecialCharactersGroup(grp.id)}
-              className={`px-2.5 py-0.5 text-xs font-medium rounded-t-md border border-b-0 transition-colors ${
+              className={`px-3.5 py-1.5 text-xs font-semibold rounded-t-lg border border-b-0 transition-all cursor-pointer ${
                 specialCharactersGroup === grp.id
-                  ? 'bg-[#EDEBD7] dark:bg-gray-800 text-amber-900 dark:text-amber-300 font-bold border-gray-400 dark:border-gray-600 shadow-xs'
-                  : 'bg-[#D2D0B8] dark:bg-gray-950 text-gray-600 dark:text-gray-400 hover:bg-[#DDDBC2] border-transparent'
+                  ? 'bg-[#EDEAE0] dark:bg-gray-900 text-amber-900 dark:text-amber-300 border-gray-400 dark:border-gray-700 shadow-xs translate-y-[1px]'
+                  : 'bg-[#CECAB9] dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-[#DDD9C8] dark:hover:bg-gray-700 border-transparent'
               }`}
             >
-              Group {grp.id}
+              Grup {grp.id}
             </button>
           ))}
         </div>
 
         <button
           onClick={toggleSpecialCharacters}
-          className="p-1 rounded-sm hover:bg-black/10 dark:hover:bg-white/10 text-gray-600 dark:text-gray-300"
-          title="Close Special Characters (Ctrl+K)"
+          className="p-1.5 rounded-lg hover:bg-black/10 dark:hover:bg-white/10 text-gray-600 dark:text-gray-300 transition-colors cursor-pointer"
+          title="Tutup Panel Karakter Spesial (Ctrl+K)"
         >
-          <X size={15} />
+          <X size={16} />
         </button>
       </div>
 
-      {/* Grid of Characters (Two rows: Top row with Alt shortcut, Middle shortcut letter, Bottom row) */}
-      <div className="p-2 overflow-x-auto">
-        <div className="flex items-stretch gap-1.5 justify-start min-w-max pb-1">
+      {/* Grid of Characters */}
+      <div className="p-3 sm:p-4 overflow-x-auto">
+        <div className="flex items-stretch gap-2.5 justify-start min-w-max pb-1">
           {currentGroup.items.map((item: SpecialCharItem) => (
             <div
               key={item.id}
-              className="flex flex-col items-center bg-[#F8F7EE] dark:bg-gray-700/80 rounded-md border border-gray-300 dark:border-gray-600 shadow-xs hover:border-amber-500 transition-colors"
-              style={{ width: '80px' }}
+              className="flex flex-col items-center bg-white dark:bg-gray-800 rounded-xl border border-gray-300 dark:border-gray-700 shadow-xs hover:border-amber-500 hover:shadow-md transition-all"
+              style={{ width: '90px' }}
             >
               {/* Top Character Button */}
               <button
                 onClick={() => handleInsert(item.charTop)}
                 title={`${item.labelTop} (Alt+${currentGroup.id}, ${item.keyLetter})`}
-                className="w-full h-12 flex items-center justify-center text-lg font-arabic font-bold text-gray-900 dark:text-white hover:bg-amber-100 dark:hover:bg-amber-950/60 rounded-t-md transition-colors px-1"
+                className="w-full h-14 flex items-center justify-center text-xl font-arabic font-bold text-gray-900 dark:text-white hover:bg-amber-100/70 dark:hover:bg-amber-950/60 rounded-t-xl transition-colors px-1 cursor-pointer"
                 dir="rtl"
               >
                 {item.charTop}
               </button>
 
               {/* Middle Key Letter Indicator */}
-              <div className="w-full py-0.5 bg-[#E4E2CC] dark:bg-gray-800 text-[10px] font-mono font-bold text-center text-amber-800 dark:text-amber-400 border-y border-gray-300 dark:border-gray-600">
+              <div className="w-full py-0.5 bg-[#F0ECE1] dark:bg-gray-700/70 text-[11px] font-mono font-bold text-center text-amber-900 dark:text-amber-300 border-y border-gray-200 dark:border-gray-700">
                 {item.keyLetter}
               </div>
 
@@ -89,7 +89,7 @@ export function SpecialCharactersPanel() {
               <button
                 onClick={() => handleInsert(item.charBottom)}
                 title={`${item.labelBottom} (${item.keyLetter})`}
-                className="w-full h-12 flex items-center justify-center text-lg font-arabic font-bold text-gray-900 dark:text-white hover:bg-amber-100 dark:hover:bg-amber-950/60 rounded-b-md transition-colors px-1"
+                className="w-full h-14 flex items-center justify-center text-xl font-arabic font-bold text-gray-900 dark:text-white hover:bg-amber-100/70 dark:hover:bg-amber-950/60 rounded-b-xl transition-colors px-1 cursor-pointer"
                 dir="rtl"
               >
                 {item.charBottom}

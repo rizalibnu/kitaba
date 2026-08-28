@@ -64,8 +64,9 @@ html {
 /* Tiptap Editor styles */
 .tiptap {
   outline: none;
-  padding: 2rem;
-  min-height: 100%;
+  padding: 0;
+  min-height: 800px;
+  height: auto;
   font-family: var(--font-arabic);
   font-size: 1.5rem;
   direction: rtl;
@@ -75,23 +76,6 @@ html {
 
 .dark .tiptap {
   color: var(--color-gray-100);
-}
-
-.tiptap p.is-empty::before,
-.tiptap p.is-editor-empty:first-child::before {
-  content: attr(data-placeholder);
-  float: right;
-  color: #9ca3af;
-  pointer-events: none;
-  height: 0;
-  font-style: italic;
-}
-
-[dir="ltr"] .tiptap p.is-empty::before,
-[dir="ltr"] .tiptap p.is-editor-empty:first-child::before,
-.tiptap[dir="ltr"] p.is-empty::before,
-.tiptap[dir="ltr"] p.is-editor-empty:first-child::before {
-  float: left;
 }
 
 .tiptap p {

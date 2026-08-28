@@ -4,7 +4,6 @@ import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import TextAlign from '@tiptap/extension-text-align';
 import Underline from '@tiptap/extension-underline';
-import Placeholder from '@tiptap/extension-placeholder';
 import CharacterCount from '@tiptap/extension-character-count';
 import { TextStyle } from '@tiptap/extension-text-style';
 import FontFamily from '@tiptap/extension-font-family';
@@ -20,9 +19,10 @@ import { setActiveEditor } from './EditorContext';
 import { useDocumentStore } from '@/stores/documentStore';
 import { useEditorStore } from '@/stores/editorStore';
 import { AVAILABLE_FONTS } from '@/types';
+import { processImportedContent } from '@/lib/khtImportHelper';
 
 export function NaskhEditor() {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const activeDoc = useDocumentStore((s) => s.getActiveDocument());
   const updateContent = useDocumentStore((s) => s.updateDocumentContent);
   const { fontFamily, fontSize, lineHeight, textDirection, zoom } = useEditorStore();
@@ -86,17 +86,6 @@ export function NaskhEditor() {
         defaultAlignment: 'right',
       }),
       Underline,
-      Placeholder.configure({
-        placeholder: ({ node, pos }) => {
-          if (pos === 0 || node.type.name === 'paragraph') {
-            return t('editor.placeholder');
-          }
-          return '';
-        },
-        emptyNodeClass: 'is-empty',
-        emptyEditorClass: 'is-editor-empty',
-        showOnlyWhenEditable: true,
-      }),
       CharacterCount,
       TextStyle,
       FontFamily,
@@ -143,15 +132,16 @@ export function NaskhEditor() {
 
     if (currentDocIdRef.current !== activeDoc.id) {
       currentDocIdRef.current = activeDoc.id;
+
       if (activeDoc.content) {
         editor.commands.setContent(activeDoc.content);
       } else {
         editor.commands.setContent('<p dir="rtl"></p>');
       }
     }
-  }, [editor, activeDoc?.id, activeDoc?.content]);
+  }, [editor, activeDoc?.id]);
 
-  // Update editor attributes and inline styling when formatting state changes
+  // Sync editor font, size, line-height, and text direction changes
   useEffect(() => {
     if (!editor || editor.isDestroyed) return;
 
@@ -175,21 +165,6 @@ export function NaskhEditor() {
     });
   }, [editor, resolvedFont, fontSize, lineHeight, textDirection]);
 
-  // Re-render editor when language changes so placeholder updates
-  useEffect(() => {
-    if (!editor || editor.isDestroyed) return;
-    const phExt = editor.extensionManager.extensions.find((e) => e.name === 'placeholder');
-    if (phExt) {
-      phExt.options.placeholder = ({ node, pos }: { node: any; pos: number }) => {
-        if (pos === 0 || node.type.name === 'paragraph') {
-          return t('editor.placeholder');
-        }
-        return '';
-      };
-    }
-    editor.view.dispatch(editor.state.tr);
-  }, [editor, i18n.language, t]);
-
   if (!activeDoc) {
     return (
       <div className="flex items-center justify-center h-full text-gray-400 bg-[#A2A582] dark:bg-gray-900">
@@ -198,25 +173,47 @@ export function NaskhEditor() {
     );
   }
 
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'copy';
+  };
+
+  const handleDrop = async (e: React.DragEvent) => {
+    e.preventDefault();
+    const file = e.dataTransfer.files?.[0];
+    if (file) {
+      try {
+        const text = await file.text();
+        processImportedContent(text, file.name, editor);
+      } catch (err) {
+        console.error('Failed to import dropped file:', err);
+      }
+    }
+  };
+
   return (
-    <div className="flex flex-col flex-1 h-full overflow-hidden bg-[#A2A582] dark:bg-gray-950">
+    <div
+      className="flex flex-col flex-1 h-full overflow-hidden bg-[#A2A582] dark:bg-gray-950"
+      onDragOver={handleDragOver}
+      onDrop={handleDrop}
+    >
       {/* Editor Canvas Page */}
       <div
         ref={canvasContainerRef}
-        className="flex-1 overflow-auto flex justify-center p-4 sm:p-6"
+        className="flex-1 overflow-y-auto overflow-x-auto flex justify-center p-4 sm:p-8"
         style={{
           zoom: zoom !== 100 ? `${zoom}%` : undefined,
         }}
       >
         <div
-          className="w-full bg-[#EDEAD8] dark:bg-[#252533] text-gray-950 dark:text-gray-50 shadow-2xl rounded-xs min-h-[900px] border border-gray-400 dark:border-gray-700 transition-all cursor-text"
+          className="w-full bg-[#EDEAD8] dark:bg-[#252533] text-gray-950 dark:text-gray-50 shadow-2xl rounded-xs min-h-[960px] h-fit mb-24 border border-gray-400 dark:border-gray-700 transition-all cursor-text"
           style={{
             maxWidth: '820px', // A4 proportion page width
             padding: '2.5rem 3rem',
           }}
           onClick={() => editor?.commands.focus()}
         >
-          <EditorContent editor={editor} className="min-h-full" />
+          <EditorContent editor={editor} className="min-h-[850px] h-auto" />
         </div>
       </div>
     </div>
