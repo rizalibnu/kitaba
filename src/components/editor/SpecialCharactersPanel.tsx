@@ -62,40 +62,45 @@ export function SpecialCharactersPanel() {
       </div>
 
       {/* Grid of Characters */}
-      <div className="p-3 sm:p-4 overflow-x-auto">
-        <div className="flex items-stretch gap-2.5 justify-start min-w-max pb-1">
-          {currentGroup.items.map((item: SpecialCharItem) => (
-            <div
-              key={item.id}
-              className="flex flex-col items-center bg-white dark:bg-gray-800 rounded-xl border border-gray-300 dark:border-gray-700 shadow-xs hover:border-amber-500 hover:shadow-md transition-all"
-              style={{ width: '90px' }}
-            >
-              {/* Top Character Button */}
-              <button
-                onClick={() => handleInsert(item.charTop)}
-                title={`${item.labelTop} (Alt+${currentGroup.id}, ${item.keyLetter})`}
-                className="w-full h-14 flex items-center justify-center text-xl font-arabic font-bold text-gray-900 dark:text-white hover:bg-amber-100/70 dark:hover:bg-amber-950/60 rounded-t-xl transition-colors px-1 cursor-pointer"
-                dir="rtl"
+      <div className="p-3 sm:p-4 overflow-x-auto flex justify-center">
+        <div className="flex items-stretch gap-2.5 justify-center min-w-max mx-auto pb-1">
+          {currentGroup.items.map((item: SpecialCharItem) => {
+            const isLongText = item.charTop.length > 10 || item.charBottom.length > 10;
+            return (
+              <div
+                key={item.id}
+                className="flex flex-col items-center bg-white dark:bg-gray-800 rounded-xl border border-gray-300 dark:border-gray-700 shadow-xs hover:border-amber-500 hover:shadow-md transition-all"
+                style={{ width: isLongText ? '120px' : '90px' }}
               >
-                {item.charTop}
-              </button>
+                {/* Top Character Button */}
+                <button
+                  onClick={() => handleInsert(item.charTop)}
+                  title={`${item.labelTop} (Alt+${currentGroup.id}, ${item.keyLetter})`}
+                  className="w-full h-14 flex items-center justify-center text-center font-arabic font-bold text-gray-900 dark:text-white hover:bg-amber-100/70 dark:hover:bg-amber-950/60 rounded-t-xl transition-colors px-2 cursor-pointer leading-snug overflow-hidden"
+                  style={{ fontSize: isLongText ? '13px' : '20px' }}
+                  dir="rtl"
+                >
+                  {item.charTop}
+                </button>
 
-              {/* Middle Key Letter Indicator */}
-              <div className="w-full py-0.5 bg-[#F0ECE1] dark:bg-gray-700/70 text-[11px] font-mono font-bold text-center text-amber-900 dark:text-amber-300 border-y border-gray-200 dark:border-gray-700">
-                {item.keyLetter}
+                {/* Middle Key Letter Indicator */}
+                <div className="w-full py-0.5 bg-[#F0ECE1] dark:bg-gray-700/70 text-[11px] font-mono font-bold text-center text-amber-900 dark:text-amber-300 border-y border-gray-200 dark:border-gray-700">
+                  {item.keyLetter}
+                </div>
+
+                {/* Bottom Character Button */}
+                <button
+                  onClick={() => handleInsert(item.charBottom)}
+                  title={`${item.labelBottom} (${item.keyLetter})`}
+                  className="w-full h-14 flex items-center justify-center text-center font-arabic font-bold text-gray-900 dark:text-white hover:bg-amber-100/70 dark:hover:bg-amber-950/60 rounded-b-xl transition-colors px-2 cursor-pointer leading-snug overflow-hidden"
+                  style={{ fontSize: isLongText ? '13px' : '20px' }}
+                  dir="rtl"
+                >
+                  {item.charBottom}
+                </button>
               </div>
-
-              {/* Bottom Character Button */}
-              <button
-                onClick={() => handleInsert(item.charBottom)}
-                title={`${item.labelBottom} (${item.keyLetter})`}
-                className="w-full h-14 flex items-center justify-center text-xl font-arabic font-bold text-gray-900 dark:text-white hover:bg-amber-100/70 dark:hover:bg-amber-950/60 rounded-b-xl transition-colors px-1 cursor-pointer"
-                dir="rtl"
-              >
-                {item.charBottom}
-              </button>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
     </div>
