@@ -32,6 +32,8 @@ import {
   PanelLeft,
   Eye,
   Upload,
+  Hash,
+  Layers,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useUIStore } from '@/stores/uiStore';
@@ -463,6 +465,41 @@ export function MenuBar() {
           shortcut: 'Ctrl+F',
           checked: autoReplace,
           action: () => toggleAutoReplace(),
+        },
+      ],
+    },
+    {
+      id: 'insert',
+      label: 'Insert',
+      items: [
+        {
+          id: 'endWaqaf',
+          label: 'Nomor Ayat & Waqaf Akhir..',
+          icon: Hash,
+          shortcut: 'F12',
+          action: () => useUIStore.getState().openWaqafDialog('end'),
+        },
+        {
+          id: 'midWaqaf',
+          label: 'Tanda Waqaf di Tengah Ayat..',
+          icon: Sparkles,
+          shortcut: 'Shift+F12',
+          action: () => useUIStore.getState().openWaqafDialog('mid'),
+        },
+        { id: 'sep-ins-1', label: '', separator: true },
+        {
+          id: 'insHarakat',
+          label: 'Panel Tanda Harakat',
+          icon: Layers,
+          shortcut: 'Ctrl+Shift+H',
+          action: () => useUIStore.getState().toggleHarakatPalette(),
+        },
+        {
+          id: 'insSpecialChars',
+          label: 'Panel Karakter Spesial',
+          icon: Sparkles,
+          shortcut: 'Ctrl+K',
+          action: () => useUIStore.getState().toggleSpecialCharacters(),
         },
       ],
     },

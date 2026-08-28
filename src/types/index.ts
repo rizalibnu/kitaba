@@ -100,13 +100,13 @@ export const AVAILABLE_FONTS: FontOption[] = [...ARABIC_FONTS, ...LATIN_FONTS];
 
 export const FONT_SIZES = [12, 14, 16, 18, 20, 22, 24, 26, 28, 32, 36, 48, 72];
 
-// 12 Tanda Waqaf Kitaba
+// 12 Tanda Waqaf Kitaba (Authentic Nonosoft matrix: 4 rows x 3 cols)
 export const KITABA_WAQAF_SIGNS: WaqafSign[] = [
   { id: 'mim', char: 'مـ', nameId: 'Waqaf Lazim (م)', nameEn: 'Compulsory Stop (م)', nameAr: 'وقف لازم', unicode: 'U+06D6' },
   { id: 'saly', char: 'صلى', nameId: 'Al-Wasl Awla (صلى)', nameEn: 'Preferred Continue (صلى)', nameAr: 'الوصل أولى', unicode: 'U+06DA' },
   { id: 'sad', char: 'صـ', nameId: 'Waqaf Murakhkhas (ص)', nameEn: 'Permitted Stop (ص)', nameAr: 'وقف مرخص', unicode: 'U+06D9' },
   { id: 'la', char: 'لا', nameId: 'La Taqif (لا)', nameEn: 'Do Not Stop (لا)', nameAr: 'لا تقف', unicode: 'U+06DC' },
-  { id: 'three_dots', char: '∴', nameId: "Mu'anaqah (∴)", nameEn: 'Embracing Stop (∴)', nameAr: 'معانقة', unicode: 'U+06DE' },
+  { id: 'three_dots', char: '؞', nameId: "Mu'anaqah (؞)", nameEn: 'Embracing Stop (؞)', nameAr: 'معانقة', unicode: 'U+061E' },
   { id: 'qaf', char: 'ق', nameId: 'Qila Alayhil Waqf (ق)', nameEn: 'Weak Stop (ق)', nameAr: 'قيل عليه الوقف', unicode: 'U+06D7' },
   { id: 'jim', char: 'جـ', nameId: 'Waqaf Jaiz (ج)', nameEn: 'Permissible Stop (ج)', nameAr: 'وقف جائز', unicode: 'U+06D8' },
   { id: 'tho', char: 'طـ', nameId: 'Waqaf Mutlaq (ط)', nameEn: 'Absolute Stop (ط)', nameAr: 'وقف مطلق', unicode: 'U+06D7' },

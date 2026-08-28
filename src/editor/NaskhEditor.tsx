@@ -163,6 +163,16 @@ export function NaskhEditor() {
         }
       }
 
+      // F12 / Shift+F12: Waqaf & Nomor Ayat Dialog
+      if (e.key === 'F12' || e.code === 'F12') {
+        e.preventDefault();
+        if (e.shiftKey) {
+          useUIStore.getState().openWaqafDialog('mid');
+        } else {
+          useUIStore.getState().openWaqafDialog('end');
+        }
+      }
+
       // Alt/Option + 1..5: Open Special Characters group
       const isAltKey = e.altKey || e.getModifierState?.('Alt');
       if (isAltKey && !e.ctrlKey && !e.metaKey) {

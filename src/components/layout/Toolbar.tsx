@@ -20,6 +20,7 @@ import {
   Keyboard,
   Sparkles,
   Layers,
+  Hash,
   ZoomIn,
   ZoomOut,
   Upload,
@@ -54,6 +55,7 @@ export function Toolbar() {
   const resetZoom = useEditorStore((s) => s.resetZoom);
 
   const setActiveDialog = useUIStore((s) => s.setActiveDialog);
+  const openWaqafDialog = useUIStore((s) => s.openWaqafDialog);
   const toggleSpecialCharacters = useUIStore((s) => s.toggleSpecialCharacters);
   const specialCharactersOpen = useUIStore((s) => s.specialCharactersOpen);
   const toggleHarakatPalette = useUIStore((s) => s.toggleHarakatPalette);
@@ -303,6 +305,13 @@ export function Toolbar() {
         label="Panel Tanda Harakat (Ctrl+Shift+H / Alt+H)"
         active={harakatPaletteOpen}
         onClick={toggleHarakatPalette}
+      />
+
+      {/* Group: Waqaf & Nomor Ayat Dialog */}
+      <ToolbarIconButton
+        icon={Hash}
+        label="Nomor Ayat & Tanda Waqaf (F12 / Shift+F12)"
+        onClick={() => openWaqafDialog('end')}
       />
 
       {/* Group 11: FastWord Edit Icon */}
