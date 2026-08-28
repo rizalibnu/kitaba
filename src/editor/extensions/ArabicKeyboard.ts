@@ -352,28 +352,34 @@ export const ArabicKeyboard = Extension.create({
               return false;
             }
 
-            // 5. Special Quranic Diacritics shortcuts:
-            // Ctrl + '-' -> Mad Wajib (ـۤ)
-            if ((event.ctrlKey || event.metaKey) && event.key === '-') {
+            // 5. Special Quranic Diacritics shortcuts (Mad Wajib, Mad Jaiz, Mim Iqlab):
+            // Ctrl + '-' or Ctrl + Alt + '-' -> Mad Wajib (ـۤ / Hamzah / Mad Wajib standalone)
+            const isMinus = event.key === '-' || event.key === '_' || event.code === 'Minus' || event.code === 'NumpadSubtract';
+            if ((event.ctrlKey || event.metaKey) && isMinus) {
               event.preventDefault();
               flushCombo();
-              commitHarakat('\u0654'); // Mad Wajib / Hamzah atas
+              // Insert standalone Mad Wajib mark (can be pressed repeatedly for manual alignment)
+              commitText('\u0654');
               return true;
             }
 
-            // Ctrl + '=' -> Mad Jaiz (ـٓ)
-            if ((event.ctrlKey || event.metaKey) && (event.key === '=' || event.key === '+')) {
+            // Ctrl + '=' or Ctrl + Alt + '=' -> Mad Jaiz (ـٓ / Maddah standalone)
+            const isEqual = event.key === '=' || event.key === '+' || event.code === 'Equal' || event.code === 'NumpadAdd';
+            if ((event.ctrlKey || event.metaKey) && isEqual) {
               event.preventDefault();
               flushCombo();
-              commitHarakat('\u0653'); // Maddah / Mad Jaiz
+              // Insert standalone Mad Jaiz mark (can be pressed repeatedly for manual alignment)
+              commitText('\u0653');
               return true;
             }
 
-            // Ctrl + '\' -> Mim Iqlab (مۢ)
-            if ((event.ctrlKey || event.metaKey) && event.key === '\\') {
+            // Ctrl + '\' or Ctrl + Alt + '\' -> Mim Iqlab (مۢ / Small Meem standalone)
+            const isBackslash = event.key === '\\' || event.key === '|' || event.code === 'Backslash';
+            if ((event.ctrlKey || event.metaKey) && isBackslash) {
               event.preventDefault();
               flushCombo();
-              commitHarakat('\u06E2'); // Meem Iqlab
+              // Insert standalone Mim Iqlab mark (can be pressed repeatedly for manual alignment)
+              commitText('\u06E2');
               return true;
             }
 

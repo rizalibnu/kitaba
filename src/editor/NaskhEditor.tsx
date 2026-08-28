@@ -100,14 +100,8 @@ export function NaskhEditor() {
       if (e.ctrlKey || e.metaKey) {
         const keyLower = e.key.toLowerCase();
 
-        // Zoom shortcuts
-        if (e.key === '=' || e.key === '+') {
-          e.preventDefault();
-          zoomIn(10);
-        } else if (e.key === '-' || e.key === '_') {
-          e.preventDefault();
-          zoomOut(10);
-        } else if (e.key === '0') {
+        // Zoom reset shortcut (Ctrl+0)
+        if (e.key === '0') {
           e.preventDefault();
           resetZoom();
         }
